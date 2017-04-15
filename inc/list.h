@@ -1,16 +1,16 @@
 /*
-List of int, written in C. 
+List of uint, written in C. 
 	© BladeMight
 */
 #include <stdlib.h>
 #ifndef LIST_T
 	#define LIST_T
 	typedef struct list {
-		int val;
+		unsigned int val;
 		int lenght;
 		struct list* next;
 	} list_t;
-	list_t* InitList(int val) {
+	list_t* InitList(unsigned int val) {
 		list_t* list = malloc(sizeof(list_t));
 		if (val != -1) {
 			list->val = val;
@@ -35,7 +35,7 @@ List of int, written in C.
 			wprintf(L"\n");
 		}
 	}
-	int add(list_t* head, int val) {
+	int add(list_t* head, unsigned int val) {
 		// int lenght = 1;
 		// wprintf(L"%d", head->lenght);
 		if (head->lenght == 0 || head == NULL) {
@@ -156,7 +156,7 @@ List of int, written in C.
 		}
 		return -1;
 	}
-	int val_index(list_t* head, int val) {
+	int val_index(list_t* head, unsigned int val) {
 		int index = 0;
 		list_t* current = head;
 		while (current != NULL) {

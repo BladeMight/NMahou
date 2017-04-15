@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "../NMahou.h"
+#include "clipboard.h"
 
 bool shift, alt, ctrl, win;
-
 void SetModifs(int code, bool value) {
 		switch(code) {
 		case 160: case 161:
@@ -78,7 +78,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			SetModifs(code, true);
 		else if (wParam == WM_KEYUP)
 			SetModifs(code, false);
-		wchar_t *modifs = malloc(5+3+3+3 * sizeof(wchar_t));
+		wchar_t *modifs = malloc(5+3+4+3 * sizeof(wchar_t));
 		shift ?	wcscpy(modifs, L"Shift") : wcscpy(modifs, L"");
 		if (alt)
 			wcscat(modifs, L"Alt");
@@ -142,8 +142,14 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					   clear(&c_word);
 					if (code == VK_F7)
 						ConvertLastWord();
-					if (code == VK_F6)
+					if (code == VK_F11)
+						wprintf(L"%s\n", GetClipboardText());
+					if (code == VK_F12)
+						SetClipboardText(L"LOLRRRRRRRRRRRRRRRRRrr IT WORKS");
+					if (code == VK_F6) {
 						print_list(c_word);
+						print_list(a_layouts);
+					}
 					if (code == VK_F4)
 						PostQuitMessage(WM_QUIT);
 					if (code == VK_F2)

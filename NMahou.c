@@ -4,11 +4,26 @@
 #include <io.h>
 #include "NMahou.h"
 
+void RefreshLayouts() {
+	UINT LayoutsCount = GetKeyboardLayoutList(0, NULL);
+	HKL* layouts = (HKL*)LocalAlloc(LPTR, (LayoutsCount * sizeof(HKL)));
+	GetKeyboardLayoutList(LayoutsCount, layouts);
+	for (int i = 0; i < LayoutsCount; i++) {
+		wprintf(L"%i\n", layouts[i]);
+		HKL l = layouts[i];
+		add(a_layouts, (uintptr_t)l);
+	}
+	a_layouts->lenght = LayoutsCount - 1;
+	print_list(a_layouts);
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR nCmdLine, int nCmdShow)
 {
 	//Allows displaying of Unicode characters in console.
 	_setmode(_fileno(stdout), _O_U16TEXT);
 	c_word = InitList(-1);
+	a_layouts = InitList(-1);
+	RefreshLayouts();
 	MSG Msg;
 	WNDCLASS wc = { 0 };
 	wc.style         = CS_HREDRAW | CS_VREDRAW;
