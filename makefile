@@ -4,7 +4,7 @@ OBJ=$(OBJDIR)/$(NAME).o $(OBJDIR)/resource.o
 INC=-I.\inc -I.\res
 CC=gcc
 RC=windres
-FLG=-lgdi32 -lcomctl32 -s -Os -DUNICODE -D_UNICODE
+FLG=-lgdi32 -lcomctl32 -s -Os
 # ARCH=Architecture x86(x32) or x64. [-m32]
 ifeq ($(ARCH), -m32)
 	RCARCH=-F pe-i386
@@ -22,10 +22,18 @@ endif
 ifeq ($(PACK), Y)
 	UPXEXEC=&& upx -9 $(EXE)
 endif
+
 all: $(OBJDIR) $(OBJ)
 	@echo Compiling objects into executable...
 	@$(CC) $(ARCH) $(INC) $(OBJ) $(FLG) -o $(EXE) $(UPXEXEC)
 	@echo Done.
+
+both: 
+	@echo -e "\e[34mCompiling x32 executable...\e[0m"
+	-@$(MAKE) -s all ARCH=-m32
+	@echo -e "\e[33mCompiling x64 executable...\e[0m"
+	-@$(MAKE) -s all ARCH=
+	@echo -e "\e[32mBoth executable compilation done.\e[0m"
 
 $(OBJDIR):
 	@mkdir -p $(OBJDIR)
@@ -49,8 +57,11 @@ run: all
 	@echo Starting executable...
 	@./$(EXE)
 	@$(MAKE) clean
+
 zip: all
 	@echo Compressing executables...
 	-@upx -9 $(EXE)
 	@echo Done.
+
 re: clean all
+reboth: clean both
