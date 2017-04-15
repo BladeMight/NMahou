@@ -1,0 +1,7 @@
+Priority: TODO
+5: Hooks
+4: Conversions
+3: Debug Mode
+3: Saving
+1: GUI
+0: Easier GUI
