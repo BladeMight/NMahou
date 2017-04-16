@@ -68,11 +68,13 @@ List of uint, written in C.
 			wprintf(L"==> len: %d\n", 0);
 			return retval;
 		}
+		if (head == NULL) {
+			return 0;
+		}
+		wprintf(L"ALIVE  %d\n", head);
 		if (head->next == NULL) {
 			retval = head->val;
-			free(head);
-			head = malloc(sizeof(list_t));
-			head->lenght = 0;
+			head = InitList(-1);
 			wprintf(L"--> rem: [%d], len: %d\n", retval, 0);
 			return retval;
 		}
@@ -109,6 +111,7 @@ List of uint, written in C.
 		free(*head);
 		(*head) = malloc(sizeof(list_t));
 		(*head)->lenght = 0;
+		wprintf(L"--<Cleared>--\n");
 	}
 	int rem_index(list_t** head, int index) {	
 		int retval = 0;

@@ -9,11 +9,13 @@ void RefreshLayouts() {
 	HKL* layouts = (HKL*)LocalAlloc(LPTR, (LayoutsCount * sizeof(HKL)));
 	GetKeyboardLayoutList(LayoutsCount, layouts);
 	for (int i = 0; i < LayoutsCount; i++) {
-		wprintf(L"%i\n", layouts[i]);
+		// wprintf(L"%i\n", layouts[i]);
 		HKL l = layouts[i];
 		add(a_layouts, (uintptr_t)l);
+		LAYOUT2 = (uintptr_t)l;
 	}
 	a_layouts->lenght = LayoutsCount - 1;
+	LAYOUT1 = index_val(a_layouts, 0);
 	print_list(a_layouts);
 }
 
@@ -25,13 +27,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR nCmdLine,
 	a_layouts = InitList(-1);
 	RefreshLayouts();
 	MSG Msg;
-	WNDCLASS wc = { 0 };
-	wc.style         = CS_HREDRAW | CS_VREDRAW;
-	wc.lpfnWndProc   = WndProc;
-	// wc.hInstance     = hInstance;
-	wc.lpszClassName = "Main Window Class";
-	wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
-	RegisterClass(&wc);
 	HHOOK NMMHook = SetWindowsHookEx( WH_KEYBOARD_LL, LowLevelKeyboardProc, hInstance,0);
 	HWND NMMWindow = CreateDialogParam(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), 0, (DLGPROC)WndProc, 0);
 	NMMainHWND = NMMWindow;

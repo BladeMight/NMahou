@@ -4,6 +4,7 @@ LPWSTR GetClipboardText() {
 	OpenClipboard(NMMainHWND);
 	LPWSTR _GetText = GetClipboardData(CF_UNICODETEXT);
 	for (int i = 0; i != 3; i++) {
+		wprintf(L"Tries %i, result: %s.\n", i, _GetText);
 		if (_GetText == NULL)
 			_GetText = GetClipboardData(CF_UNICODETEXT);
 		else break;
@@ -15,7 +16,8 @@ LPWSTR GetClipboardText() {
 void SetClipboardText(LPWSTR _Text) {
 	LPWSTR _TextBuffer;
 	HGLOBAL _SetBuffer;
-	_SetBuffer = GlobalAlloc(GHND, wcslen(_Text) * sizeof(WCHAR)); 
+	wprintf(L"Settings [%s] text to clipboard...", _Text);
+	_SetBuffer = GlobalAlloc(GHND, (wcslen(_Text) + 1) * sizeof(wchar_t)); 
 	if(_SetBuffer != NULL) {
 		_TextBuffer = (LPWSTR)GlobalLock(_SetBuffer);
 		if(_TextBuffer != NULL) {

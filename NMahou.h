@@ -14,6 +14,9 @@
 	list_t* c_word;
 	//List of all layouts
 	list_t* a_layouts;
+	//Main 2 layouts
+	unsigned int LAYOUT1;
+	unsigned int LAYOUT2;
 	//If NMahou input.
 	bool SELF = false;
 #endif
