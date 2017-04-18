@@ -65,11 +65,12 @@ void ConvertLastWord() {
 	SELF = false;
 }
 LPWSTR InAnotherLayout(wchar_t c, unsigned int layout1, unsigned int layout2) {
-	short scan = VkKeyScanExW(c, (HKL)(uintptr_t)(layout1 & 0xffff));
+	unsigned int scan = VkKeyScanExW(c, (HKL)(uintptr_t)(layout1 & 0xffff));
 	if (scan == -1) return L"";
 	wprintf(L"B %c, S %i, L %i, l %i\n", c, scan, (layout1 & 0xffff), (layout2 & 0xffff));
-	BYTE state[256];
-	if (((scan >> 8) & 0xff) == 1)
+	int CST = (scan >> 8) & 0xff;
+	BYTE* state = malloc(256);
+	if (CST == 1)
 		state[VK_SHIFT] = 0xFF;
 	LPWSTR character = malloc(sizeof(LPWSTR));
 	ToUnicodeEx(scan, scan, state, character, 3, 0, (HKL)(uintptr_t)(layout2 & 0xffff));
@@ -79,59 +80,66 @@ LPWSTR InAnotherLayout(wchar_t c, unsigned int layout1, unsigned int layout2) {
 void ConvertSelection() {
 	SELF = true;
 	LPWSTR selection = GetClipboardText();
+	unsigned int selen = wcslen(selection);
 	if (selection != NULL || selection != L"") {
 		int index = 0;
-		wchar_t result[256];
-		wchar_t* word = wcstok(selection, L" ");
-		wchar_t* last_word = wcstok(selection, L" ");
-		while(last_word != NULL) {
-			wchar_t* next = wcstok(NULL, L" ");
-			if (next != NULL)
-				last_word = next;
-			else break;
-		}
+		wchar_t* result = malloc(sizeof(wchar_t) * selen+1);
+		wcscpy(result, L"");
+		// wchar_t* word = wcstok(selection, L" ");
+		// wchar_t* last_word = wcstok(selection, L" ");
+		// while(last_word != NULL) {
+			// wchar_t* next = wcstok(NULL, L" ");
+			// if (next != NULL)
+				// last_word = next;
+			// else break;
+		// }
 		wprintf(L"Whole selection [%s].\n", selection);
-		wprintf(L"Last word [%s].\n", last_word);
-		wprintf(L"Word [%s].\n", word);
-		while(word != NULL) {
-			int len = wcslen(word);
-			wprintf(L"Word aft wcstok [%s].\n", word);
-			int wordL1minc = 0;
-			int wordL2minc = 0;
-			wchar_t wordL1[256] = L""; 
-			wchar_t wordL2[256] = L"";
-			for (int i = 0; i < len; i++) {
-				LPWSTR CL1 = InAnotherLayout(word[i], LAYOUT2, LAYOUT1);
-				LPWSTR CL2 = InAnotherLayout(word[i], LAYOUT1, LAYOUT2);
+		// wprintf(L"Last word [%s].\n", last_word);
+		// wprintf(L"Word [%s].\n", word);
+		// while(word != NULL) {
+			// int len = wcslen(word);
+			// wprintf(L"Word aft wcstok [%s].\n", word);
+			// int wordL1minc = 0;
+			// int wordL2minc = 0;
+			// wchar_t* wordL1 = malloc(len+1);
+			// wchar_t* wordL2 = malloc(len+1);
+			// wcscpy(wordL1, L"");
+			// wcscpy(wordL2, L"");
+			for (int i = 0; i < selen; i++) {
+				wprintf(L"SELEN: %i, I: %i, RLEN: %i\n", selen, i, wcslen(result));
+				LPWSTR CL1 = InAnotherLayout(selection[i], LAYOUT2, LAYOUT1);
+				LPWSTR CL2 = InAnotherLayout(selection[i], LAYOUT1, LAYOUT2);
 				if ((wcscmp(CL1, L"") == 0) && (wcscmp(CL2, L"") == 0)) {
-					wprintf(L"Rewriting [%s].\n", CL1);
-					wcscat(wordL1, &selection[index]);
-					wcscat(wordL2, &selection[index]);
-					wprintf(L"ind %s\n", (&selection)[index]);
-				}
-				if (wcscmp(CL1, L"") == 0)
-					wordL1minc++;
-				else
-					wcscat(wordL1, CL1);
-				if (wcscmp(CL2, L"") == 0)
-					wordL2minc++;
-				else
-					wcscat(wordL2, CL2);
-				wprintf(L"W1 [%s], W2 [%s]\n", wordL1, wordL2);
-				wprintf(L"C1 [%s], C2 [%s]\n", CL1, CL2);
-				wprintf(L"cc1 [%i], cc2 [%i]\n", wordL1minc, wordL2minc);
+					wprintf(L"Rewriting [%s].\n", selection[i]);
+					// wordL1 = wcspls(wordL1, &selection[i]);
+					// wordL2 = wcspls(wordL2, &selection[i]);
+					wprintf(L"ind %s\n", selection[i]);
+				} else if (wcscmp(CL1, L"") != 0)
+					wcscat(result, CL1);
+				else if (wcscmp(CL2, L"") != 0)
+					wcscat(result, CL2);
+				// if (wcscmp(CL1, L"") != 0)
+					// wordL1minc++;
+				// else
+					// wordL1 = wcspls(wordL1, CL1);
+				// if (wcscmp(CL2, L"") == 0)
+					// wordL2minc++;
+				// else
+					// wordL2 = wcspls(wordL2, CL2);
+				// wprintf(L"W1 [%s], W2 [%s]\n", wordL1, wordL2);
+				// wprintf(L"C1 [%s], C2 [%s]\n", CL1, CL2);
+				// wprintf(L"cc1 [%i], cc2 [%i]\n", wordL1minc, wordL2minc);
 				index++;
 			}
-			if (wordL1minc < wordL2minc)
-				wcscat(result, wordL1);
-			else
-				wcscat(result, wordL2);
-			if (wcscmp(word, last_word) != 0)
-				wcscat(result, L" ");
-			index++;
-			word = wcstok(NULL, L" ");
-			if (word == NULL) break;
-		}
+			// if (wordL1minc < wordL2minc)
+				// result = wcspls(result, wordL1);
+			// else
+				// result = wcspls(result, wordL2);
+			// if (wcscmp(word, last_word) != 0)
+				// result = wcspls(result, L" ");
+			// word = wcstok(NULL, L" ");
+			// if (word == NULL) break;
+		// }
 		wprintf(L"result [%s]\n", result);
 		SetClipboardText(result);
 	}
