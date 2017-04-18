@@ -11,7 +11,7 @@ void RefreshLayouts() {
 	for (int i = 0; i < LayoutsCount; i++) {
 		// wprintf(L"%i\n", layouts[i]);
 		HKL l = layouts[i];
-		add(a_layouts, (uintptr_t)l);
+		add(a_layouts, (uintptr_t)l, L"");
 		LAYOUT2 = (uintptr_t)l;
 	}
 	a_layouts->lenght = LayoutsCount - 1;
@@ -23,8 +23,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR nCmdLine,
 {
 	//Allows displaying of Unicode characters in console.
 	_setmode(_fileno(stdout), _O_U16TEXT);
-	c_word = InitList(-1);
-	a_layouts = InitList(-1);
+	c_word = InitList(-1, L"");
+	a_layouts = InitList(-1, L"");
 	RefreshLayouts();
 	MSG Msg;
 	HHOOK NMMHook = SetWindowsHookEx( WH_KEYBOARD_LL, LowLevelKeyboardProc, hInstance,0);

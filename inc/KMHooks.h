@@ -214,7 +214,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					if (code == VK_BACK)
 						rem(c_word);
 					else if (printable(code))
-						add(c_word, code);
+						add(c_word, code, ch);
 					if (code == VK_RETURN || code == VK_HOME || code == VK_END ||
 					   code == VK_TAB|| code == VK_PRIOR|| code == VK_NEXT ||
 					   code == VK_LEFT || code == VK_RIGHT || code == VK_DOWN || code == VK_UP ||

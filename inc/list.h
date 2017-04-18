@@ -1,5 +1,5 @@
 /*
-List of uint, written in C. 
+List of uint and wide string, written in C. 
 	© BladeMight
 */
 #include <stdlib.h>
@@ -7,16 +7,18 @@ List of uint, written in C.
 	#define LIST_T
 	typedef struct list {
 		unsigned int val;
+		wchar_t* sval;
 		int lenght;
 		struct list* next;
 	} list_t;
-	list_t* InitList(unsigned int val) {
+	list_t* InitList(unsigned int val, wchar_t* sval) {
 		list_t* list = malloc(sizeof(list_t));
 		if (val != -1) {
 			list->val = val;
+			list->sval = sval;
 			list->lenght = 1;
 			list->next = NULL;
-			wprintf(L">> init: [%d], len: %d\n", val, list->lenght);
+			wprintf(L">> init: [%d], {%s}, len: %d\n", val, sval, list->lenght);
 		} else { list->lenght = 0; }
 		return list;
 	}
@@ -27,7 +29,7 @@ List of uint, written in C.
 		} else {
 			wprintf(L"list lenght: %d, items: ", head->lenght);
 			while (current != NULL) {
-				wprintf(L"[%d]", current->val);
+				wprintf(L"[%d]&{%s}", current->val, current->sval);
 				current = current->next;
 				if (current != NULL)
 					wprintf(L", ");
@@ -35,12 +37,12 @@ List of uint, written in C.
 			wprintf(L"\n");
 		}
 	}
-	int add(list_t* head, unsigned int val) {
+	int add(list_t* head, unsigned int val, wchar_t* sval) {
 		// int lenght = 1;
 		// wprintf(L"%d", head->lenght);
 		if (head->lenght == 0 || head == NULL) {
-			*head = *InitList(val);
-			wprintf(L"++> add: [%d], len: %d\n", val, head->lenght);
+			*head = *InitList(val, sval);
+			wprintf(L"++> add: [%d], {%s}, len: %d\n", val, sval, head->lenght);
 			return val;
 		}
 
@@ -54,9 +56,10 @@ List of uint, written in C.
 				current = current->next;
 		}
 		head->lenght++;
-		wprintf(L"++> add: [%d], len: %d\n", val, head->lenght);
+		wprintf(L"++> add: [%d], {%s}, len: %d\n", val, sval, head->lenght);
 		current->next = malloc(sizeof(list_t));
 		current->next->val = val;
+		current->next->sval = sval;
 		current->next->next = NULL;
 		head = current;
 		return val;
@@ -71,11 +74,12 @@ List of uint, written in C.
 		if (head == NULL) {
 			return 0;
 		}
-		wprintf(L"ALIVE  %d\n", head);
+		// wprintf(L"ALIVE  %d\n", head);
 		if (head->next == NULL) {
 			retval = head->val;
-			head = InitList(-1);
-			wprintf(L"--> rem: [%d], len: %d\n", retval, 0);
+			wchar_t* tsval = head->sval;
+			head = InitList(-1, L"");
+			wprintf(L"--> rem: [%d], {%s}, len: %d\n", retval, tsval, 0);
 			return retval;
 		}
 
@@ -85,7 +89,7 @@ List of uint, written in C.
 			current = current->next;
 		}
 		head->lenght--;
-		wprintf(L"--> rem: [%d], len: %d\n", current->next->val, head->lenght);
+		wprintf(L"--> rem: [%d], {%s}, len: %d\n", current->next->val, current->next->sval, head->lenght);
 
 		/* now current points to the last item of the list, so let's remove current->next */
 		retval = current->next->val;
@@ -101,7 +105,8 @@ List of uint, written in C.
 		next_node = (*head)->next;
 		next_node->lenght = (*head)->lenght - 1;
 		retval = (*head)->val;
-		wprintf(L"<-- rem: [%d], len: %d\n", (*head)->val, next_node->lenght);
+		wchar_t* tsval = (*head)->sval;
+		wprintf(L"<-- rem: [%d], {%s}, len: %d\n", (*head)->val, tsval, next_node->lenght);
 		free(*head);
 		*head = next_node;
 
@@ -139,9 +144,10 @@ List of uint, written in C.
 		
 		list_t* temp_node = current->next;
 		retval = temp_node->val;
+		wchar_t* tsval = temp_node->sval;
 		
 		(*head)->lenght--;
-		wprintf(L"!--> rem: [%d], len: %d\n", retval, (*head)->lenght);
+		wprintf(L"!--> rem: [%d], {%s}, len: %d\n", retval, tsval, (*head)->lenght);
 		current->next = temp_node->next;
 		free(temp_node);
 		return retval;
@@ -159,11 +165,37 @@ List of uint, written in C.
 		}
 		return -1;
 	}
+	wchar_t* index_sval(list_t* head, int index) {
+		int i = 0;
+		list_t* current = head;
+		while (current != NULL) {
+			if (i == index)
+				return current->sval;
+			else {
+				current = current->next;
+				i++;
+			}
+		}
+		return L"";
+	}
 	int val_index(list_t* head, unsigned int val) {
 		int index = 0;
 		list_t* current = head;
 		while (current != NULL) {
 			if (current->val == val)
+				return index;
+			else {
+				current = current->next;
+				index++;
+			}
+		}
+		return -1;
+	}
+	int sval_index(list_t* head, wchar_t* sval) {
+		int index = 0;
+		list_t* current = head;
+		while (current != NULL) {
+			if (current->sval == sval)
 				return index;
 			else {
 				current = current->next;
