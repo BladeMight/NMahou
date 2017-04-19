@@ -4,147 +4,8 @@
 #include <stdbool.h>
 #include "../NMahou.h"
 #include "clipboard.h"
+#include "fun.h"
 
-bool shift, alt, ctrl, win;
-void SetModifs(int code, bool value) {
-		switch(code) {
-		case 160: case 161:
-			shift = value;	 break;
-		case 162: case 163:
-			ctrl = value; 	 break;
-		case 164: case 165:
-			alt = value; 	 break;
-		case 91: case 92:
-			win = value; 	 break;
-		}
-}
-bool printable(int code) {
-	bool numoff = (GetKeyState(VK_NUMLOCK) & 1) != 0;
-	if ((code >= 0x30 && code <= 0x5A) ||
-	    (code >= VK_OEM_1 && code <= VK_OEM_102) || 
-		(numoff && (code >= VK_NUMPAD0 && code <= VK_NUMPAD9)) ||
-		(code >= VK_MULTIPLY && code <= VK_DIVIDE))
-		return true;
-	else
-		return false;
-}
-bool extended(int code) {
-	switch(code) {
-		case VK_MENU:    case VK_LMENU:    case VK_RMENU:
-		case VK_CONTROL: case VK_RCONTROL: case VK_CANCEL:
-		case VK_END: 	 case VK_INSERT:   case VK_DELETE:
-		case VK_HOME:	 case VK_NEXT: 	   case VK_PRIOR:
-		case VK_RIGHT:   case VK_LEFT:     case VK_DOWN:
-		case VK_UP: 	 case VK_SNAPSHOT: case VK_NUMLOCK:
-		case VK_DIVIDE:
-			return true;
-		default:
-			return false;
-	}
-}
-void KeyPress(int key) {
-	bool ext = extended(key);
-	keybd_event(key, MapVirtualKey(key, 0), ext ? KEYEVENTF_EXTENDEDKEY : 0 | 0, 0);
-	keybd_event(key, MapVirtualKey(key, 0), ext ? KEYEVENTF_EXTENDEDKEY : 0 | 2, 0);
-}
-void ChangeLayout() {
-	// if (cyclemode)
-	PostMessage(GetForegroundWindow(), WM_INPUTLANGCHANGEREQUEST, 0, HKL_NEXT);
-	// else if (simulate)
-	// else
-}
-void ConvertLastWord() {
-	SELF = true;
-	ChangeLayout();
-	for (int i = 0; i < c_word->lenght; i++)
-		KeyPress(VK_BACK);
-	for (int i = 0; i <= c_word->lenght; i++) {
-		int key = index_val(c_word, i);
-		KeyPress(key);
-	}
-	SELF = false;
-}
-LPWSTR InAnotherLayout(wchar_t c, unsigned int layout1, unsigned int layout2) {
-	unsigned int scan = VkKeyScanExW(c, (HKL)(uintptr_t)(layout1 & 0xffff));
-	if (scan == -1) return L"";
-	wprintf(L"B %c, S %i, L %i, l %i\n", c, scan, (layout1 & 0xffff), (layout2 & 0xffff));
-	int CST = (scan >> 8) & 0xff;
-	BYTE* state = malloc(256);
-	if (CST == 1)
-		state[VK_SHIFT] = 0xFF;
-	LPWSTR character = malloc(sizeof(LPWSTR));
-	ToUnicodeEx(scan, scan, state, character, 3, 0, (HKL)(uintptr_t)(layout2 & 0xffff));
-	wprintf(L"character is [%s]\n", character);
-	return character;
-}
-void ConvertSelection() {
-	SELF = true;
-	LPWSTR selection = GetClipboardText();
-	unsigned int selen = wcslen(selection);
-	if (selection != NULL || selection != L"") {
-		int index = 0;
-		wchar_t* result = malloc(sizeof(wchar_t) * selen+1);
-		wcscpy(result, L"");
-		// wchar_t* word = wcstok(selection, L" ");
-		// wchar_t* last_word = wcstok(selection, L" ");
-		// while(last_word != NULL) {
-			// wchar_t* next = wcstok(NULL, L" ");
-			// if (next != NULL)
-				// last_word = next;
-			// else break;
-		// }
-		wprintf(L"Whole selection [%s].\n", selection);
-		// wprintf(L"Last word [%s].\n", last_word);
-		// wprintf(L"Word [%s].\n", word);
-		// while(word != NULL) {
-			// int len = wcslen(word);
-			// wprintf(L"Word aft wcstok [%s].\n", word);
-			// int wordL1minc = 0;
-			// int wordL2minc = 0;
-			// wchar_t* wordL1 = malloc(len+1);
-			// wchar_t* wordL2 = malloc(len+1);
-			// wcscpy(wordL1, L"");
-			// wcscpy(wordL2, L"");
-			for (int i = 0; i < selen; i++) {
-				wprintf(L"SELEN: %i, I: %i, RLEN: %i\n", selen, i, wcslen(result));
-				LPWSTR CL1 = InAnotherLayout(selection[i], LAYOUT2, LAYOUT1);
-				LPWSTR CL2 = InAnotherLayout(selection[i], LAYOUT1, LAYOUT2);
-				if ((wcscmp(CL1, L"") == 0) && (wcscmp(CL2, L"") == 0)) {
-					wprintf(L"Rewriting [%s].\n", selection[i]);
-					// wordL1 = wcspls(wordL1, &selection[i]);
-					// wordL2 = wcspls(wordL2, &selection[i]);
-					wprintf(L"ind %s\n", selection[i]);
-				} else if (wcscmp(CL1, L"") != 0)
-					wcscat(result, CL1);
-				else if (wcscmp(CL2, L"") != 0)
-					wcscat(result, CL2);
-				// if (wcscmp(CL1, L"") != 0)
-					// wordL1minc++;
-				// else
-					// wordL1 = wcspls(wordL1, CL1);
-				// if (wcscmp(CL2, L"") == 0)
-					// wordL2minc++;
-				// else
-					// wordL2 = wcspls(wordL2, CL2);
-				// wprintf(L"W1 [%s], W2 [%s]\n", wordL1, wordL2);
-				// wprintf(L"C1 [%s], C2 [%s]\n", CL1, CL2);
-				// wprintf(L"cc1 [%i], cc2 [%i]\n", wordL1minc, wordL2minc);
-				index++;
-			}
-			// if (wordL1minc < wordL2minc)
-				// result = wcspls(result, wordL1);
-			// else
-				// result = wcspls(result, wordL2);
-			// if (wcscmp(word, last_word) != 0)
-				// result = wcspls(result, L" ");
-			// word = wcstok(NULL, L" ");
-			// if (word == NULL) break;
-		// }
-		wprintf(L"result [%s]\n", result);
-		SetClipboardText(result);
-	}
-	SELF = false;
-}
 //The function that implements the key logging functionality
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 	// Declare a pointer to the KBDLLHOOKSTRUCT
@@ -153,13 +14,13 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 	unsigned int code = kbdact->vkCode;
 	LONG scan = kbdact->scanCode << 16;
 	if (GetForegroundWindow() != NMMainHWND) {
-		WCHAR lpszName[256];
+		wchar_t* lpszName = malloc(256); wcscpy(lpszName, L"");
 		GetKeyNameTextW(scan, lpszName, 256);
 		if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)
 			SetModifs(code, true);
 		else if (wParam == WM_KEYUP)
 			SetModifs(code, false);
-		wchar_t modifs[16] = L"";
+		wchar_t* modifs = malloc(16); wcscpy(modifs, L"");
 		shift ?	wcscat(modifs, L"Shift") : wcscat(modifs, L"");
 		if (alt)
 			wcscat(modifs, L"Alt");
@@ -167,7 +28,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			wcscat(modifs, L"Ctrl");
 		if (win)
 			wcscat(modifs, L"Win");
-		// printf("Sh=%i, Al=%i, Ct=%i, Wi=%i, wParam=%i.\n", shift, alt, ctrl, win, wParam);
+		//wprintf(L"Sh=%i, Al=%i, Ct=%i, Wi=%i, wParam=%i.\n", shift, alt, ctrl, win, wParam);
 		BYTE kst[256];
 		if (shift)
 			kst[16] = 0xff;
@@ -182,7 +43,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		LPWSTR ch = malloc(sizeof(LPWSTR));
 		if (printable(code))
 			ToUnicodeEx(code,0,kst,ch,3,0,GetKeyboardLayout(GetWindowThreadProcessId(GetForegroundWindow(), NULL)));
-			// wprintf(L"ToUni returned =[%i], parameters c=[%i],s=[%i],k=[%i],ch=[%i],l=[%i].\n",,code, 0, kst, ch, GetKeyboardLayout(GetWindowThreadProcessId(GetForegroundWindow(), NULL)));
+			//wprintf(L"ToUni returned =[%i], parameters c=[%i],s=[%i],k=[%i],ch=[%i],l=[%i].\n",,code, 0, kst, ch, GetKeyboardLayout(GetWindowThreadProcessId(GetForegroundWindow(), NULL)));
 		else
 			ch = L"";
 		if (!SELF) 
@@ -240,6 +101,15 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					if (code == VK_F9)
 						ConvertSelection();
 					break;
+		}
+	}
+	return CallNextHookEx( NULL, nCode, wParam, lParam);
+}
+LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
+	if (nCode >= 0) {
+		if (wParam == WM_RBUTTONDOWN || wParam == WM_LBUTTONDOWN) {
+			clear(&c_word);
+			wprintf(L"Cleared by mouse click.\n");
 		}
 	}
 	return CallNextHookEx( NULL, nCode, wParam, lParam);

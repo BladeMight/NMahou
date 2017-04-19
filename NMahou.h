@@ -14,6 +14,8 @@
 	list_t* c_word;
 	//List of all layouts
 	list_t* a_layouts;
+	//Modifiers
+	bool shift, alt, ctrl, win;
 	//Main 2 layouts
 	unsigned int LAYOUT1;
 	unsigned int LAYOUT2;

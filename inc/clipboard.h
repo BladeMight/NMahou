@@ -1,5 +1,10 @@
 #include <windows.h>
 
+void ClearClipboard() {	
+	OpenClipboard(NULL);
+	EmptyClipboard();
+	CloseClipboard();
+}
 LPWSTR GetClipboardText() {
 	OpenClipboard(NMMainHWND);
 	LPWSTR _GetText = GetClipboardData(CF_UNICODETEXT);
