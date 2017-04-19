@@ -104,8 +104,36 @@ void InputString(wchar_t* str) {
 		SendInput(1, &up, sizeof(INPUT));
 	}
 }
-// IMPLICIT DECLARATION OF FUNCTION WARNING DISABLER
-wchar_t* wcstok_s(wchar_t* in, wchar_t* deli, wchar_t** safe);
+wchar_t* wcsztok(wchar_t* str, const wchar_t* delim) {
+    static wchar_t* static_str = 0;
+    int index = 0, strlength = 0;
+    int found = 0;	
+    if (delim == 0 || (str == 0 && static_str == 0))
+        return 0;	
+    if (str == 0)
+        str = static_str;	
+    while(str[strlength])
+        strlength++;	
+    for (index = 0; index < strlength; index++)
+        if (str[index] == delim[0]) {
+            found=1;
+            break;
+        }
+    if (!found) {
+        static_str = 0;
+        return str;
+    }
+    if (str[0] == delim[0]) {
+        static_str = (str + 1);
+        return (wchar_t* )delim;
+    }
+    str[index] = '\0';
+    if ((str + index + 1)!=0)
+        static_str = (str + index + 1);
+    else
+        static_str = 0;
+	return str;
+}
 void ConvertSelection() {
 	SELF = true;
 	LPWSTR backup = GetClipboardText();
@@ -117,15 +145,15 @@ void ConvertSelection() {
 		wchar_t* result = malloc(selen+1); wcscpy(result, L"");
 		wchar_t* line;
 		wchar_t* word;
-		wchar_t* nu;
+		// wchar_t* nu;
 		line = wcstok(selection, L"\n");
 		while (line != NULL) {
 			wprintf (L"Line: [%s],\n  Words: ", line);
-			word = wcstok_s(line, L" ", &nu);
+			word = wcsztok(line, L" ");
 			while (word != NULL) {
 				int wolen = wcslen(word);
 				wprintf(L"(%s)", word);
-				wprintf(L"\n{%s}\n", nu);
+				// wprintf(L"\n{%s}\n", nu);
 				int woL1min = 0;
 				int woL2min = 0;
 				wchar_t* wordL1 = malloc(wolen+1); wcscpy(wordL1, L"");
@@ -156,8 +184,8 @@ void ConvertSelection() {
 					wcscat(result, wordL1);
 				else
 					wcscat(result, wordL2);
-				word = wcstok_s(NULL, L" ", &nu);
-				if (word != NULL) // If not LAST word
+				word = wcsztok(NULL, L" ");
+				if (word != NULL && word != L" ")
 					wcscat(result, L" ");
 			}
 			wprintf(L"\n");
