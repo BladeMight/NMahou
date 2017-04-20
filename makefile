@@ -60,7 +60,7 @@ run: all
 
 zip: all
 	@echo Compressing executables...
-	-@upx -9 $(EXE)
+	-@upx -9 $(NAME).exe $(NAME)64.exe
 	@echo Done.
 
 re: clean all

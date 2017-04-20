@@ -30,6 +30,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR nCmdLine,
 	HHOOK NMMMHook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, hInstance,0);
 	HWND NMMWindow = CreateDialogParam(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), 0, (DLGPROC)WndProc, 0);
 	NMMainHWND = NMMWindow;
+	SetWindowTextW(NMMainHWND, L"Native Mahou 0.01");
 	if(NMMWindow) {
 		ShowWindow(NMMWindow, nCmdShow);
 		UpdateWindow(NMMWindow);
