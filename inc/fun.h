@@ -66,14 +66,14 @@ void ConvertLastWord() {
 LPWSTR InAnotherLayout(wchar_t c, unsigned int layout1, unsigned int layout2) {
 	unsigned int scan = VkKeyScanExW(c, (HKL)(uintptr_t)(layout1 & 0xffff));
 	if (scan == -1) return L"";
-	wprintf(L"B %c, S %i, L %i, l %i\n", c, scan, (layout1 & 0xffff), (layout2 & 0xffff));
+	// wprintf(L"B %c, S %i, L %i, l %i\n", c, scan, (layout1 & 0xffff), (layout2 & 0xffff));
 	int CST = (scan >> 8) & 0xff;
 	BYTE* state = malloc(256);
 	if (CST == 1)
 		state[VK_SHIFT] = 0xFF;
 	LPWSTR character = malloc(sizeof(LPWSTR));
 	ToUnicodeEx(scan, scan, state, character, 3, 0, (HKL)(uintptr_t)(layout2 & 0xffff));
-	wprintf(L"character is [%s]\n", character);
+	// wprintf(L"character is [%s]\n", character);
 	return character;
 }
 void InputString(wchar_t* str) {
@@ -141,28 +141,28 @@ void ConvertSelection() {
 	SendClipCopy();
 	LPWSTR selection = GetClipboardText();
 	if (selection != NULL && selection != L"") {
-		unsigned int selen = wcslen(selection);
-		wchar_t* result = malloc(selen+1); wcscpy(result, L"");
+		int selen = wcslen(selection);
+		wchar_t* result = malloc(sizeof(wchar_t) * (selen+1)); wcscpy(result, L"");
 		wchar_t* line;
 		wchar_t* word;
-		// wchar_t* nu;
 		line = wcstok(selection, L"\n");
+		wprintf(L"Selection is [%s](%i).", selection, selen);
 		while (line != NULL) {
-			wprintf (L"Line: [%s],\n  Words: ", line);
+			wprintf (L"Line: [%s],\n  Words: ", line, selen);
 			word = wcsztok(line, L" ");
 			while (word != NULL) {
 				int wolen = wcslen(word);
 				wprintf(L"(%s)", word);
-				// wprintf(L"\n{%s}\n", nu);
 				int woL1min = 0;
 				int woL2min = 0;
-				wchar_t* wordL1 = malloc(wolen+1); wcscpy(wordL1, L"");
-				wchar_t* wordL2 = malloc(wolen+1); wcscpy(wordL2, L"");
+				wchar_t* wordL1 = malloc(sizeof(wchar_t) * (wolen+1)); wcscpy(wordL1, L"");
+				wchar_t* wordL2 = malloc(sizeof(wchar_t) * (wolen+1)); wcscpy(wordL2, L"");
 				for (int i = 0; i < wolen; i++) {
 					wprintf(L"WOLEN: %i, I: %i, RLEN: %i\n", wolen, i, wcslen(result));
 					LPWSTR CL1 = InAnotherLayout(word[i], LAYOUT2, LAYOUT1);
 					LPWSTR CL2 = InAnotherLayout(word[i], LAYOUT1, LAYOUT2);
-					if ((wcscmp(CL1, L"") == 0) && (wcscmp(CL2, L"") == 0)) {
+					if ((wcscmp(CL1, L"") == 0) && (wcscmp(CL2, L"") == 0) ||
+						wcscmp(CL1, CL2) == 0) {
 						wprintf(L"Rewriting [%c].\n", word[i]);
 						wordL1[i] = word[i];
 						wordL2[i] = word[i];
@@ -176,10 +176,10 @@ void ConvertSelection() {
 						else
 							woL2min++;
 					}
-					wprintf(L"W1 [%s], W2 [%s]\n", wordL1, wordL2);
 					wprintf(L"C1 [%s], C2 [%s]\n", CL1, CL2);
-					wprintf(L"cc1 [%i], cc2 [%i]\n", woL1min, woL2min);
 				}
+				wprintf(L"W1 [%s], W2 [%s]\n", wordL1, wordL2);
+				wprintf(L"cc1 [%i], cc2 [%i]\n", woL1min, woL2min);
 				if (woL1min < woL2min)
 					wcscat(result, wordL1);
 				else
