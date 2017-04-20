@@ -1,5 +1,5 @@
 ﻿# Native Mahou 
-Native Mahou(ネイティブ魔法) - a faster layout switcher(just like [Mahou](https://github.com/BladeMight/Mahou)) written in **C**, it contains even more *magic*.
+Native Mahou(ネイティブ魔法) - a faster layout switcher(just like [Mahou](https://github.com/BladeMight/Mahou)) written in **C**, it contains even more high level *magic*:sunny: :cyclone: :snowflake: :zap:.
 
 # Q/A
 
