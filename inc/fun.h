@@ -1,16 +1,4 @@
 /* Contains all NMahou functions */
-void SetModifs(int code, bool value) {
-	switch(code) {
-		case 160: case 161:
-			shift = value;	 break;
-		case 162: case 163:
-			ctrl = value; 	 break;
-		case 164: case 165:
-			alt = value; 	 break;
-		case 91: case 92:
-			win = value; 	 break;
-	}
-}
 bool printable(int code) {
 	bool numoff = (GetKeyState(VK_NUMLOCK) & 1) != 0;
 	if ((code >= 0x30 && code <= 0x5A) ||
@@ -35,10 +23,52 @@ bool extended(int code) {
 			return false;
 	}
 }
+void KeyRelease(int key) {
+	bool ext = extended(key);
+	keybd_event(key, MapVirtualKey(key, 0), ext ? KEYEVENTF_EXTENDEDKEY : 0 | 2, 0);
+}
 void KeyPress(int key) {
 	bool ext = extended(key);
 	keybd_event(key, MapVirtualKey(key, 0), ext ? KEYEVENTF_EXTENDEDKEY : 0 | 0, 0);
 	keybd_event(key, MapVirtualKey(key, 0), ext ? KEYEVENTF_EXTENDEDKEY : 0 | 2, 0);
+}
+void SetModifs(int code, bool value) {
+	switch(code) {
+		case VK_LSHIFT: 
+			Lshift = value;	 break;
+		case VK_RSHIFT:
+			Rshift = value;	 break;
+		case VK_LCONTROL:
+			Lctrl = value; 	 break;
+		case VK_RCONTROL:
+			Rctrl = value; 	 break;
+		case VK_LMENU: 
+			Lalt = value; 	 break;
+		case VK_RMENU:
+			Ralt = value; 	 break;
+		case VK_LWIN:
+			Lwin = value; 	 break;
+		case VK_RWIN:
+			Rwin = value; 	 break;
+	}
+}
+void SendModifiersUp() {
+	if (Lshift)
+		KeyRelease(VK_LSHIFT);
+	if (Lalt)
+		KeyRelease(VK_LMENU);
+	if (Lctrl)
+		KeyRelease(VK_LCONTROL);
+	if (Lwin)
+		KeyRelease(VK_LWIN);
+	if (Rshift)
+		KeyRelease(VK_RSHIFT);
+	if (Ralt)
+		KeyRelease(VK_RMENU);
+	if (Rctrl)
+		KeyRelease(VK_RCONTROL);
+	if (Rwin)
+		KeyRelease(VK_RWIN);
 }
 void SendClipCopy() {
 	keybd_event(VK_RCONTROL, MapVirtualKey(VK_RCONTROL, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
@@ -52,13 +82,14 @@ void ChangeLayout() {
 	// else if (simulate)
 	// else
 }
-void ConvertLastWord() {
+void ConvertTyped(list_t* word) {
 	SELF = true;
+	SendModifiersUp();
 	ChangeLayout();
-	for (int i = 0; i < c_word->lenght; i++)
+	for (int i = 0; i < word->lenght; i++)
 		KeyPress(VK_BACK);
-	for (int i = 0; i <= c_word->lenght; i++) {
-		int key = index_val(c_word, i);
+	for (int i = 0; i <= word->lenght; i++) {
+		int key = index_val(word, i);
 		KeyPress(key);
 	}
 	SELF = false;
@@ -200,4 +231,41 @@ void ConvertSelection() {
 	if (backup != NULL)
 		SetClipboardText(backup);
 	SELF = false;
+}
+int CheckHotkey(int code) {
+	if (Lshift && code == VK_F7) {
+		ConvertTyped(c_word);
+		return 1;
+	}
+	if (code == VK_F7) {
+		ConvertTyped(c_line);
+		return 2;
+	}
+	if (code == VK_F9) {
+		ConvertSelection();
+		return 3;
+	}
+	if (code == VK_F6) {
+		print_list(c_line);
+		print_list(c_word);
+		print_list(a_layouts);
+		return 4;
+	}
+	if (code == VK_F4) {
+		PostQuitMessage(WM_QUIT);
+		return 7;
+	}
+	if (code == VK_F11) {
+		wprintf(L"%s\n", GetClipboardText());
+		return 5;
+	}
+	if (code == VK_F2) {
+		PostMessage(GetForegroundWindow(), WM_INPUTLANGCHANGEREQUEST, 0, HKL_NEXT);
+		return 6;
+	}
+	if (code == VK_F12) {
+		SetClipboardText(L"LOLRRRRRRRRRRRRRRRRRrr IT WORKS");
+		return 7;
+	}
+	return -1;
 }

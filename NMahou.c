@@ -23,6 +23,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR nCmdLine,
 	//Allows displaying of Unicode characters in console.
 	_setmode(_fileno(stdout), _O_U16TEXT);
 	c_word = InitList(-1, L"");
+	c_line = InitList(-1, L"");
 	a_layouts = InitList(-1, L"");
 	RefreshLayouts();
 	MSG Msg;
@@ -30,7 +31,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR nCmdLine,
 	HHOOK NMMMHook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, hInstance,0);
 	HWND NMMWindow = CreateDialogParam(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), 0, (DLGPROC)WndProc, 0);
 	NMMainHWND = NMMWindow;
-	SetWindowTextW(NMMainHWND, L"Native Mahou 0.01");
+	SetWindowTextW(NMMainHWND, L"Native Mahou 0.02");
 	if(NMMWindow) {
 		ShowWindow(NMMWindow, nCmdShow);
 		UpdateWindow(NMMWindow);

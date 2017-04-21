@@ -10,12 +10,14 @@
 	#endif
 	//Main Handle of Main Window
 	static HWND NMMainHWND;
-	//Main list of keys
+	//Main list of word keys
 	list_t* c_word;
+	//Main list of line keys
+	list_t* c_line;
 	//List of all layouts
 	list_t* a_layouts;
 	//Modifiers
-	bool shift, alt, ctrl, win;
+	bool Rshift, Ralt, Rctrl, Rwin, Lshift, Lalt, Lctrl, Lwin;
 	//Main 2 layouts
 	unsigned int LAYOUT1;
 	unsigned int LAYOUT2;

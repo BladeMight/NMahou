@@ -5,8 +5,9 @@ Native Mahou(ネイティブ魔法) - a faster layout switcher(just like [Mahou]
 
 - **F2** - Change layout.
 - **F4** - Quit.
-- **F6** - Print all characters/codes in last line.
-- **F7** - Convert last line(eats spaces).
+- **F6** - Print all characters/codes in last word/line/layouts.
+- **F7** - Convert last word.
+- **L-Shift+F7** - Convert last line.
 - **F9** - Convert selection.
 - **F11** - Print current clipboard text.
 - **F12** - Test SetClipboardText function.
