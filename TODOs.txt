@@ -1,7 +1,8 @@
 Priority: TODO: STATUS
 5: Hooks      : DONE
-4: Conversions: WORKING
-3: Debug Mode : WORKING
+4: Conversions: DONE
+3: Debug Mode : DONE(INITIAL)
+3: No Debug   : WORKING
 3: Saving     : WORKING
 1: GUI        : INCOMPLETE
 0: Easier GUI : UPPER
