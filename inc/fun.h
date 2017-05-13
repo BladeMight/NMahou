@@ -264,8 +264,11 @@ int CheckHotkey(int code) {
 		return 6;
 	}
 	if (code == VK_F12) {
-		SetClipboardText(L"LOLRRRRRRRRRRRRRRRRRrr IT WORKS");
+		SetClipboardText(L"Copied to clipboard by NMahou. Just for testing. LOL...");
 		return 7;
 	}
 	return -1;
+}
+void InitVersion() { // Initializes Native Mahou version string
+	NM_VERSION = malloc(4 * sizeof(wchar_t)); wcscpy(NM_VERSION, L"0.023");
 }

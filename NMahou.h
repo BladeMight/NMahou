@@ -8,8 +8,12 @@
 	#ifndef _UNICODE
 		#define _UNICODE
 	#endif
+	wchar_t* NM_VERSION;
 	//Main Handle of Main Window
-	static HWND NMMainHWND;
+	HWND NMMainHWND;
+	HINSTANCE NMInstance;
+	NOTIFYICONDATA NMTrayIcon;
+	HMENU NMTrayMenu;
 	//Main list of word keys
 	list_t* c_word;
 	//Main list of line keys

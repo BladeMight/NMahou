@@ -4,7 +4,7 @@ OBJ=$(OBJDIR)/$(NAME).o $(OBJDIR)/resource.o
 INC=-I.\inc -I.\res
 CC=gcc
 RC=windres
-FLG=-lgdi32 -lcomctl32 -s -Os
+FLG=-lgdi32 -lcomctl32 -s -Os -DUNICODE -D_UNICODE
 # ARCH=Architecture x86(x32) or x64. [-m32]
 ifeq ($(ARCH), -m32)
 	RCARCH=-F pe-i386

@@ -1,11 +1,43 @@
 #include <windows.h>
 #include <stdio.h>
 #include "../res/resource.h"
-
+void ToggleVisibility() {	
+	if (!IsWindowVisible(NMMainHWND)) {
+		ShowWindow(NMMainHWND, SW_SHOW);
+		SetForegroundWindow(NMMainHWND);
+	}
+	else 
+		ShowWindow(NMMainHWND, SW_HIDE);
+}
 LRESULT CALLBACK WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	int Result = 0;
 	switch (Msg) {
+		case WM_SYSICON: {
+			if (lParam == WM_LBUTTONUP) {
+				wprintf(L"Tray clicked w/ LMB\n");
+				ToggleVisibility();
+			}
+			else if (lParam == WM_RBUTTONDOWN)  {
+				wprintf(L"Tray clicked w/ RMB\n");
+				// Get current mouse position.
+				POINT curPoint;
+				GetCursorPos(&curPoint);
+
+				// TrackPopupMenu blocks the app until TrackPopupMenu returns
+
+				UINT clicked = TrackPopupMenu(NMTrayMenu, TPM_RETURNCMD | TPM_NONOTIFY, curPoint.x, curPoint.y, 0, hWnd, NULL);
+
+
+				
+				SendMessage(hWnd, WM_NULL, 0, 0); // send benign message to window to make sure the menu goes away.
+				if (clicked == IDM_EXIT) {
+					PostMessage(NMMainHWND, WM_DESTROY, wParam, lParam);
+				} else if (clicked == IDM_TOGGLE) 
+					ToggleVisibility(); 
+			}
+		}
+		break;
 		case WM_COMMAND:
 			switch (LOWORD(wParam)) {
 			case 9:
@@ -30,7 +62,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			break;
 		case WM_DESTROY:
 			wprintf(L"Shutdown passed...");
-			PostQuitMessage(0);
+			Shell_NotifyIcon(NIM_DELETE, &NMTrayIcon);
+			PostQuitMessage(0) ;
 			break;
 		default:
 			Result = DefWindowProc(hWnd, Msg, wParam, lParam);
