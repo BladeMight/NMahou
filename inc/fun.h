@@ -105,6 +105,8 @@ LPWSTR InAnotherLayout(wchar_t c, unsigned int layout1, unsigned int layout2) {
 	LPWSTR character = malloc(sizeof(LPWSTR));
 	ToUnicodeEx(scan, scan, state, character, 3, 0, (HKL)(uintptr_t)(layout2 & 0xffff));
 	// wprintf(L"character is [%s]\n", character);
+	free(state);
+	// free(character);
 	return character;
 }
 void InputString(wchar_t* str) {
@@ -218,6 +220,8 @@ void ConvertSelection() {
 				word = wcsztok(NULL, L" ");
 				if (word != NULL && word != L" ")
 					wcscat(result, L" ");
+				free(wordL1);
+				free(wordL2);
 			}
 			wprintf(L"\n");
 			line = wcstok(NULL, L"\n");
@@ -227,6 +231,7 @@ void ConvertSelection() {
 		wprintf(L"Whole selection [%s].\n", selection);
 		wprintf(L"INPUTTING: result [%s]\n", result);
 		InputString(result);
+		free(result);
 	}
 	if (backup != NULL)
 		SetClipboardText(backup);

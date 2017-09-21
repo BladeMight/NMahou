@@ -13,8 +13,8 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 	// Initialize variables
 	unsigned int code = kbdact->vkCode;
 	LONG scan = kbdact->scanCode << 16;
-	if (GetForegroundWindow() != NMMainHWND) {
-		wchar_t* keyName = malloc(256); wcscpy(keyName, L"");
+	if (GetForegroundWindow() != NMMainHWND && !SELF) {
+		wchar_t* keyName = malloc(sizeof(wchar_t)*256); wcscpy(keyName, L"");
 		GetKeyNameTextW(scan, keyName, 256);
 		if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)
 			SetModifs(code, true);
@@ -37,14 +37,16 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 			wcscat(modifs, L"R-Ctrl ");
 		if (Rwin)
 			wcscat(modifs, L"R-Win ");
-		BYTE* kst = malloc(256);
+		BYTE* kst = malloc(sizeof(BYTE)*256);
 		if (Lshift || Rshift)
 			kst[16] = 0xFF;
-		LPWSTR ch = malloc(sizeof(LPWSTR));
+		wchar_t* ch = malloc(sizeof(wchar_t)*4);
 		if (printable(code))
 			ToUnicodeEx(code,0,kst,ch,3,0,GetKeyboardLayout(GetWindowThreadProcessId(GetForegroundWindow(), NULL)));
-		else
+		else {
+			free(ch);
 			ch = L"";
+		}
 		if (!SELF) 
 		switch(wParam) {
 			case WM_KEYUP:
@@ -91,6 +93,12 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					wprintf(L"Hotkey <%i> fired(-1 = not).\n", CheckHotkey(code));
 					break;
 		}
+		wprintf(L"Freeing allocated variables(keyName, modifs, ch, kst).\n");
+		free(keyName);
+		free(modifs);
+		if (ch != L"")
+			free(ch);
+		free(kst);
 	}
 	return CallNextHookEx( NULL, nCode, wParam, lParam);
 }

@@ -6,7 +6,7 @@ void ClearClipboard() {
 	CloseClipboard();
 }
 LPWSTR GetClipboardText() {
-	OpenClipboard(NMMainHWND);
+	OpenClipboard(0);
 	LPWSTR _GetText = GetClipboardData(CF_UNICODETEXT);
 	for (int i = 0; i != 3; i++) {
 		wprintf(L"Tries %i, result: %s.\n", i, _GetText);
