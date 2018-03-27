@@ -85,7 +85,7 @@ run: all
 
 zip: all
 	@echo Compressing executables...
-	-@upx -9 $(BINDIR)$(NAME).exe $(BINDIR)$(NAME)64.exe $(BINDIR)jkl.exe $(BINDIR)jklx86.exe
+	-@upx -9 $(BINDIR)$(NAME).exe $(BINDIR)$(NAME)64.exe $(BINDIR)jkl.dll $(BINDIR)jklx86.exe $(BINDIR)jklx86.dll
 	@echo Done.
 
 re: clean all
