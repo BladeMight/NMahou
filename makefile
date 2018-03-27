@@ -14,7 +14,7 @@ exeflg=-DUNICODE -D_UNICODE -s -Os -o
 ifeq ($(ARCH), -m32)
 	RCARCH=-F pe-i386
 	OBJDIR=obj
-	XARCH=-DX86
+	XARCH=-DSUPPORTX86
 	EXE=$(NAME).exe
 else
 	OBJDIR=obj64
@@ -37,8 +37,8 @@ all: $(OBJDIR) $(BINDIR) $(OBJ)
 
 $(OBJDIR)/jkl.dll.o:
 	@echo Compiling jkl.dll...
-	$(CC) jkl/jkl.cxx -c $(dllflg) $(OBJDIR)/jkl.dll.o
-	$(CC) $(OBJDIR)/jkl.dll.o $(dllflg) $(BINDIR)jkl.dll
+	$(CC) $(ARCH) jkl/jkl.cxx -c $(dllflg) $(OBJDIR)/jkl.dll.o
+	$(CC) $(ARCH) $(OBJDIR)/jkl.dll.o $(dllflg) $(BINDIR)jkl.dll
 
 $(OBJDIR)/jklx86.dll.o:
 	@echo Compiling jklx86.dll...
@@ -65,7 +65,7 @@ $(BINDIR):
 
 $(OBJDIR)/%.o: %.c
 	@echo Compiling $@...
-	@$(CC) $(ARCH) $(XARCH) $(INC) -c $< -o $@
+	$(CC) $(ARCH) $(XARCH) $(INC) -c $< -o $@
 	@echo Done.
 
 $(OBJDIR)/resource.o:

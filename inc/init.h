@@ -37,7 +37,7 @@ void InitJKL() {
 			wprintf(L"HOOK SET FAILED!");
 		UFUNC getUMsg = (UFUNC)GetProcAddress(lib, "getUMsg");
 		uMSG = getUMsg();
-		#ifndef X86
+		#ifndef SUPPORTX86
 			if (FileExist(L"jklx86.exe"))
 				ShellExecute(0, L"open", L"jklx86.exe", NULL, L".\\", SW_HIDE);
 			else
