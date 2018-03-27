@@ -8,3 +8,9 @@ Priority: TODO                  : STATUS
 3: Saving                       : WORKING
 1: GUI                          : INCOMPLETE
 0: Easier GUI                   : UPPER
+0: Flags In Tray                : FUTURE
+0: Language Tooltips Mouse/Caret: FUTURE
+0: Language Panel               : FUTURE
+0: Snippets/AutoSwitch          : FUTURE
+0: Updates                      : FUTURE
+0: Other Functions from Mahou   : FUTURE
