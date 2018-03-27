@@ -1,8 +1,10 @@
-Priority: TODO: STATUS
-5: Hooks      : DONE
-4: Conversions: DONE
-3: Debug Mode : DONE(INITIAL)
-3: No Debug   : WORKING
-3: Saving     : WORKING
-1: GUI        : INCOMPLETE
-0: Easier GUI : UPPER
+Priority: TODO                  : STATUS
+7: Layout Detection Hook aka JKL: DONE
+5: Hooks                        : DONE
+4: Conversions                  : DONE
+3: Debug Mode                   : DONE(INITIAL)
+3: No Debug                     : WORKING
+4: Settings                     : FUTURE
+3: Saving                       : WORKING
+1: GUI                          : INCOMPLETE
+0: Easier GUI                   : UPPER
