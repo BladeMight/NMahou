@@ -1,6 +1,7 @@
 # HDR=include/callbacks.h include/resource.h
 NAME=NMahou
 BINDIR=bin/
+BINS=$(BINDIR)jkl.dll
 MAHOU_OBJ=$(OBJDIR)/$(NAME).o $(OBJDIR)/resource.o
 OBJ=$(MAHOU_OBJ) $(OBJDIR)/jkl.dll.o
 INC=-I.\inc -I.\res -I.\jkl
@@ -20,6 +21,7 @@ else
 	OBJDIR=obj64
 	OBJ := $(OBJ) $(OBJDIR)/jklx86.exe.o $(OBJDIR)/jklx86.dll.o
 	EXE=$(NAME)64.exe
+	BINS := $(BINS) $(BINDIR)jklx86.exe $(BINDIR)jklx86.dll
 endif
 # DBG=Debug mode, don't use [-s] and [-Os] switches. [Y]
 ifeq ($(DBG), Y)
@@ -30,25 +32,34 @@ ifeq ($(PACK), Y)
 	UPXEXEC=&& upx -9 $(EXE)
 endif
 
-all: $(OBJDIR) $(BINDIR) $(OBJ)
-	@echo Compiling objects into executable...
+all: $(OBJDIR) $(BINDIR) $(OBJ) $(BINS)
+	@echo Compiling NMahou.exe objects into executable...
 	@$(CC) $(ARCH) $(INC) $(MAHOU_OBJ) $(FLG) $(XARCH) -o $(BINDIR)$(EXE) $(UPXEXEC)
 	@echo Done.
 
 $(OBJDIR)/jkl.dll.o:
+	@echo Compiling jkl.dll.o...
+	@$(CC) $(ARCH) jkl/jkl.cxx -c $(dllflg) $(OBJDIR)/jkl.dll.o
+	
+$(BINDIR)jkl.dll:
 	@echo Compiling jkl.dll...
-	$(CC) $(ARCH) jkl/jkl.cxx -c $(dllflg) $(OBJDIR)/jkl.dll.o
-	$(CC) $(ARCH) $(OBJDIR)/jkl.dll.o $(dllflg) $(BINDIR)jkl.dll
-
+	@$(CC) $(ARCH) $(OBJDIR)/jkl.dll.o $(dllflg) $(BINDIR)jkl.dll
+	
 $(OBJDIR)/jklx86.dll.o:
+	@echo Compiling jklx86.dll.o...
+	@$(CC) -m32 jkl/jkl.cxx -c $(dllflg) $(OBJDIR)/jklx86.dll.o
+
+$(BINDIR)jklx86.dll:
 	@echo Compiling jklx86.dll...
-	$(CC) -m32 jkl/jkl.cxx -c $(dllflg) $(OBJDIR)/jklx86.dll.o
-	$(CC) -m32 $(OBJDIR)/jklx86.dll.o $(dllflg) $(BINDIR)jklx86.dll
+	@$(CC) -m32 $(OBJDIR)/jklx86.dll.o $(dllflg) $(BINDIR)jklx86.dll
 
 $(OBJDIR)/jklx86.exe.o:
+	@echo Compiling jklx86.exe.o...
+	@$(CC) jkl/jklx86.c -c -m32 $(exeflg) $(OBJDIR)/jklx86.exe.o	
+
+$(BINDIR)jklx86.exe:
 	@echo Compiling jklx86.exe...
-	$(CC) jkl/jklx86.c -c -m32 $(exeflg) $(OBJDIR)/jklx86.exe.o	
-	$(CC) $(OBJDIR)/jklx86.exe.o -m32 $(exeflg) $(BINDIR)jklx86.exe
+	@$(CC) $(OBJDIR)/jklx86.exe.o -m32 $(exeflg) $(BINDIR)jklx86.exe
 
 both: 
 	@echo -e "\e[34mCompiling x32 executable...\e[0m"
@@ -65,7 +76,7 @@ $(BINDIR):
 
 $(OBJDIR)/%.o: %.c
 	@echo Compiling $@...
-	$(CC) $(ARCH) $(XARCH) $(INC) -c $< -o $@
+	@$(CC) $(ARCH) $(XARCH) $(INC) -c $< -o $@
 	@echo Done.
 
 $(OBJDIR)/resource.o:
