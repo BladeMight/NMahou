@@ -1,15 +1,15 @@
 /* Contains all NMahou functions */
-bool printable(int code) {
-	bool numoff = (GetKeyState(VK_NUMLOCK) & 1) != 0;
+BOOL printable(int code) {
+	BOOL numoff = (GetKeyState(VK_NUMLOCK) & 1) != 0;
 	if ((code >= 0x30 && code <= 0x5A) ||
 	    (code >= VK_OEM_1 && code <= VK_OEM_102) || 
 		(numoff && (code >= VK_NUMPAD0 && code <= VK_NUMPAD9)) ||
 		(code >= VK_MULTIPLY && code <= VK_DIVIDE))
-		return true;
+		return TRUE;
 	else
-		return false;
+		return FALSE;
 }
-bool extended(int code) {
+BOOL extended(int code) {
 	switch(code) {
 		case VK_MENU:    case VK_LMENU:    case VK_RMENU:
 		case VK_CONTROL: case VK_RCONTROL: case VK_CANCEL:
@@ -18,21 +18,21 @@ bool extended(int code) {
 		case VK_RIGHT:   case VK_LEFT:     case VK_DOWN:
 		case VK_UP: 	 case VK_SNAPSHOT: case VK_NUMLOCK:
 		case VK_DIVIDE:
-			return true;
+			return TRUE;
 		default:
-			return false;
+			return FALSE;
 	}
 }
 void KeyRelease(int key) {
-	bool ext = extended(key);
+	BOOL ext = extended(key);
 	keybd_event(key, MapVirtualKey(key, 0), ext ? KEYEVENTF_EXTENDEDKEY : 0 | 2, 0);
 }
 void KeyPress(int key) {
-	bool ext = extended(key);
+	BOOL ext = extended(key);
 	keybd_event(key, MapVirtualKey(key, 0), ext ? KEYEVENTF_EXTENDEDKEY : 0 | 0, 0);
 	keybd_event(key, MapVirtualKey(key, 0), ext ? KEYEVENTF_EXTENDEDKEY : 0 | 2, 0);
 }
-void SetModifs(int code, bool value) {
+void SetModifs(int code, BOOL value) {
 	switch(code) {
 		case VK_LSHIFT: 
 			Lshift = value;	 break;
@@ -83,7 +83,7 @@ void ChangeLayout() {
 	// else
 }
 void ConvertTyped(list_t* word) {
-	SELF = true;
+	SELF = TRUE;
 	SendModifiersUp();
 	ChangeLayout();
 	for (int i = 0; i < word->lenght; i++)
@@ -92,7 +92,7 @@ void ConvertTyped(list_t* word) {
 		int key = index_val(word, i);
 		KeyPress(key);
 	}
-	SELF = false;
+	SELF = FALSE;
 }
 LPWSTR InAnotherLayout(wchar_t c, unsigned int layout1, unsigned int layout2) {
 	unsigned int scan = VkKeyScanExW(c, (HKL)(uintptr_t)(layout1 & 0xffff));
@@ -168,7 +168,7 @@ wchar_t* wcsztok(wchar_t* str, const wchar_t* delim) {
 	return str;
 }
 void ConvertSelection() {
-	SELF = true;
+	SELF = TRUE;
 	LPWSTR backup = GetClipboardText();
 	ClearClipboard();
 	SendClipCopy();
@@ -235,7 +235,7 @@ void ConvertSelection() {
 	}
 	if (backup != NULL)
 		SetClipboardText(backup);
-	SELF = false;
+	SELF = FALSE;
 }
 int CheckHotkey(int code) {
 	if (Lshift && code == VK_F7) {
@@ -273,7 +273,4 @@ int CheckHotkey(int code) {
 		return 7;
 	}
 	return -1;
-}
-void InitVersion() { // Initializes Native Mahou version string
-	NM_VERSION = malloc(4 * sizeof(wchar_t)); wcscpy(NM_VERSION, L"0.023");
 }

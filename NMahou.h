@@ -1,6 +1,5 @@
 #ifndef _NMMHeader // NATIVE MAHOU MAIN HEADER
 	#define _NMMHeader
-	#include "inc/list.h"
 	#define _O_U16TEXT 0x20000
 	#ifndef UNICODE
 		#define UNICODE
@@ -8,6 +7,11 @@
 	#ifndef _UNICODE
 		#define _UNICODE
 	#endif
+	#include <windows.h>
+	#include <wchar.h>
+	#include <stdio.h>
+	#include <stdbool.h>
+	#include "inc/list.h"
 	wchar_t* NM_VERSION;
 	//Main Handle of Main Window
 	HWND NMMainHWND;
@@ -21,10 +25,14 @@
 	//List of all layouts
 	list_t* a_layouts;
 	//Modifiers
-	bool Rshift, Ralt, Rctrl, Rwin, Lshift, Lalt, Lctrl, Lwin;
+	BOOL Rshift, Ralt, Rctrl, Rwin, Lshift, Lalt, Lctrl, Lwin;
 	//Main 2 layouts
 	unsigned int LAYOUT1;
 	unsigned int LAYOUT2;
 	//If NMahou input.
-	bool SELF = false;
+	BOOL SELF = FALSE;
+	// For JKL
+	HWND MAIN_SERV;
+	HMODULE lib;
+	UINT uMSG; 
 #endif

@@ -3,6 +3,7 @@
 #include "res/resource.h"
 #include <io.h>
 #include "NMahou.h"
+#include "inc/init.h"
 
 void RefreshLayouts() {
 	UINT LayoutsCount = GetKeyboardLayoutList(0, NULL);
@@ -19,33 +20,14 @@ void RefreshLayouts() {
 	print_list(a_layouts);
 }
 void InitializeMain() {
-	// Main window title 
-	LPWSTR Title = malloc(256 * sizeof(wchar_t)); wcscpy(Title, L"");
-	wcscat(Title, L"Native Mahou "); wcscat(Title, NM_VERSION);
-	SetWindowTextW(NMMainHWND, Title);
-	// Creating tray icon
-	NMTrayIcon.cbSize = sizeof(NOTIFYICONDATA);
-	NMTrayIcon.hWnd = NMMainHWND;
-	NMTrayIcon.uID = IDI_NMICON;
-	NMTrayIcon.uVersion = NOTIFYICON_VERSION;
-	NMTrayIcon.uCallbackMessage = WM_SYSICON;
-	NMTrayIcon.hIcon = LoadIcon(NMInstance, MAKEINTRESOURCE(IDI_NMICON));
-	// Converting Title to ascii
-	char* ascii = malloc(sizeof(char) * wcslen(Title)); strcpy(ascii, "");
-	wcstombs(ascii, Title, wcslen(Title) );
-	strcpy(NMTrayIcon.szTip, ascii);
-	NMTrayIcon.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
-	wprintf(L"Creating tray menu...");
-	HMENU hn = LoadMenu(NULL, MAKEINTRESOURCE(IDM_TRAYMENU));
-	NMTrayMenu = GetSubMenu(hn, 0);
-	// Placing tray icon in *tray*
-	Shell_NotifyIcon(NIM_ADD, &NMTrayIcon);
+	InitVersion();
+	InitTrayIcon();
+	InitJKL();
 }
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR nCmdLine, int nCmdShow) {
 	//Allows displaying of Unicode characters in console.
 	NMInstance = hInstance;
 	_setmode(_fileno(stdout), _O_U16TEXT);
-	InitVersion();
 	c_word = InitList(-1, L"");
 	c_line = InitList(-1, L"");
 	a_layouts = InitList(-1, L"");

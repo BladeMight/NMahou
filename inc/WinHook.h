@@ -62,6 +62,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			break;
 		case WM_DESTROY:
 			wprintf(L"Shutdown passed...");
+			HWND X86 = FindWindow(L"_HIDDEN_X86_HELPER", NULL);
+			PostMessage(X86, WM_QUIT, 0, 0);
 			Shell_NotifyIcon(NIM_DELETE, &NMTrayIcon);
 			PostQuitMessage(0) ;
 			break;

@@ -1,7 +1,3 @@
-#include <windows.h>
-#include <wchar.h>
-#include <stdio.h>
-#include <stdbool.h>
 #include "../NMahou.h"
 #include "clipboard.h"
 #include "fun.h"
@@ -40,6 +36,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		BYTE* kst = malloc(sizeof(BYTE)*256);
 		if (Lshift || Rshift)
 			kst[16] = 0xFF;
+		else kst[16] = 0;
 		wchar_t* ch = malloc(sizeof(wchar_t)*4);
 		if (printable(code))
 			ToUnicodeEx(code,0,kst,ch,3,0,GetKeyboardLayout(GetWindowThreadProcessId(GetForegroundWindow(), NULL)));
@@ -111,4 +108,12 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		}
 	}
 	return CallNextHookEx( NULL, nCode, wParam, lParam);
+}
+
+LRESULT CALLBACK ServerProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
+	if (Msg == uMSG) // MEOW!
+		wprintf(L"LAYOUT CHANGED!!! W: %i, L: %i\n", wParam, lParam);
+	else 
+		wprintf(L"MSG: %i, %i\n", Msg, uMSG);
+	return DefWindowProc(hWnd, Msg, wParam, lParam);
 }
