@@ -18,31 +18,31 @@ List of uint and wide string, written in C.
 			list->sval = sval;
 			list->lenght = 1;
 			list->next = NULL;
-			wprintf(L">> init: [%d], {%s}, len: %d\n", val, sval, list->lenght);
+			debug(L">> init: [%d], {%s}, len: %d\n", val, sval, list->lenght);
 		} else { list->lenght = 0; }
 		return list;
 	}
 	void print_list(list_t* head) {
 		list_t* current = head;
 		if (head->lenght == 0) {
-			wprintf(L"Empty list.\n");
+			debug(L"Empty list.\n");
 		} else {
-			wprintf(L"list lenght: %d, items: ", head->lenght);
+			debug(L"list lenght: %d, items: ", head->lenght);
 			while (current != NULL) {
-				wprintf(L"[%d]&{%s}", current->val, current->sval);
+				debug(L"[%d]&{%s}", current->val, current->sval);
 				current = current->next;
 				if (current != NULL)
-					wprintf(L", ");
+					debug(L", ");
 			}
-			wprintf(L"\n");
+			debug(L"\n");
 		}
 	}
 	int add(list_t* head, unsigned int val, wchar_t* sval) {
 		// int lenght = 1;
-		// wprintf(L"%d", head->lenght);
+		// debug(L"%d", head->lenght);
 		if (head->lenght == 0 || head == NULL) {
 			*head = *InitList(val, sval);
-			wprintf(L"++> add: [%d], {%s}, len: %d\n", val, sval, head->lenght);
+			debug(L"++> add: [%d], {%s}, len: %d\n", val, sval, head->lenght);
 			return val;
 		}
 
@@ -56,7 +56,7 @@ List of uint and wide string, written in C.
 				current = current->next;
 		}
 		head->lenght++;
-		wprintf(L"++> add: [%d], {%s}, len: %d\n", val, sval, head->lenght);
+		debug(L"++> add: [%d], {%s}, len: %d\n", val, sval, head->lenght);
 		current->next = malloc(sizeof(list_t));
 		current->next->val = val;
 		current->next->sval = sval;
@@ -68,18 +68,18 @@ List of uint and wide string, written in C.
 		int retval = 0;
 		/* if there is only one item in the list, remove it */
 		if (head->lenght == 0) {
-			wprintf(L"==> len: %d\n", 0);
+			debug(L"==> len: %d\n", 0);
 			return retval;
 		}
 		if (head == NULL) {
 			return 0;
 		}
-		// wprintf(L"ALIVE  %d\n", head);
+		// debug(L"ALIVE  %d\n", head);
 		if (head->next == NULL) {
 			retval = head->val;
 			wchar_t* tsval = head->sval;
 			head = InitList(-1, L"");
-			wprintf(L"--> rem: [%d], {%s}, len: %d\n", retval, tsval, 0);
+			debug(L"--> rem: [%d], {%s}, len: %d\n", retval, tsval, 0);
 			return retval;
 		}
 
@@ -89,7 +89,7 @@ List of uint and wide string, written in C.
 			current = current->next;
 		}
 		head->lenght--;
-		wprintf(L"--> rem: [%d], {%s}, len: %d\n", current->next->val, current->next->sval, head->lenght);
+		debug(L"--> rem: [%d], {%s}, len: %d\n", current->next->val, current->next->sval, head->lenght);
 
 		/* now current points to the last item of the list, so let's remove current->next */
 		retval = current->next->val;
@@ -106,7 +106,7 @@ List of uint and wide string, written in C.
 		next_node->lenght = (*head)->lenght - 1;
 		retval = (*head)->val;
 		wchar_t* tsval = (*head)->sval;
-		wprintf(L"<-- rem: [%d], {%s}, len: %d\n", (*head)->val, tsval, next_node->lenght);
+		debug(L"<-- rem: [%d], {%s}, len: %d\n", (*head)->val, tsval, next_node->lenght);
 		free(*head);
 		*head = next_node;
 
@@ -116,13 +116,13 @@ List of uint and wide string, written in C.
 		free(*head);
 		(*head) = malloc(sizeof(list_t));
 		(*head)->lenght = 0;
-		wprintf(L"--<Cleared>--\n");
+		debug(L"--<Cleared>--\n");
 	}
 	int rem_index(list_t** head, int index) {	
 		int retval = 0;
 		// if out of bounds.
 		if (index > (*head)->lenght - 1 || index < 0) {
-			wprintf(L"?!> out of bounds: index: %d not in bounds of list: 0-%d.\n", index, (*head)->lenght - 1);
+			debug(L"?!> out of bounds: index: %d not in bounds of list: 0-%d.\n", index, (*head)->lenght - 1);
 			return retval;
 		}
 		if (index == 0) {
@@ -134,7 +134,7 @@ List of uint and wide string, written in C.
 			retval = (*head)->val;
 			free(*head);
 			(*head)->lenght = 0;
-			wprintf(L"--> len: %d\n", 0);
+			debug(L"--> len: %d\n", 0);
 			return retval;
 		}
 		list_t* current = *head;
@@ -147,7 +147,7 @@ List of uint and wide string, written in C.
 		wchar_t* tsval = temp_node->sval;
 		
 		(*head)->lenght--;
-		wprintf(L"!--> rem: [%d], {%s}, len: %d\n", retval, tsval, (*head)->lenght);
+		debug(L"!--> rem: [%d], {%s}, len: %d\n", retval, tsval, (*head)->lenght);
 		current->next = temp_node->next;
 		free(temp_node);
 		return retval;

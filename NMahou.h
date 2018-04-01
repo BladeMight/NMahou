@@ -11,6 +11,16 @@
 	#include <wchar.h>
 	#include <stdio.h>
 	#include <stdbool.h>
+	// Debug mode
+	void debug(wchar_t* a,...) {
+		#ifndef DEBUG
+		#else    
+			va_list args;
+			va_start(args, a);
+			wprintf(a, args);
+			va_end(args);
+		#endif
+	}
 	#include "inc/list.h"
 	wchar_t* NM_VERSION;
 	//Main Handle of Main Window

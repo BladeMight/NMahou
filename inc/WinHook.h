@@ -15,11 +15,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 	switch (Msg) {
 		case WM_SYSICON: {
 			if (lParam == WM_LBUTTONUP) {
-				wprintf(L"Tray clicked w/ LMB\n");
+				debug(L"Tray clicked w/ LMB\n");
 				ToggleVisibility();
 			}
 			else if (lParam == WM_RBUTTONDOWN)  {
-				wprintf(L"Tray clicked w/ RMB\n");
+				debug(L"Tray clicked w/ RMB\n");
 				// Get current mouse position.
 				POINT curPoint;
 				GetCursorPos(&curPoint);
@@ -42,26 +42,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			switch (LOWORD(wParam)) {
 			case 9:
 			case 3:
-				wprintf(L"Button [%i] pressed!\n", LOWORD(wParam));
+				debug(L"Button [%i] pressed!\n", LOWORD(wParam));
 				break;
 			// case 666:
-				// wprintf(L"Combobox index changed.\n");
+				// debug(L"Combobox index changed.\n");
 				// HWND cmbox = GetDlgItem(hWnd, 666);
 				// int cunya = SendMessage(cmbox,CB_GETCURSEL, (WORD)0, 0L);
 				// char* value[32];
 				// SendMessageW(cmbox, CB_GETLBTEXT, (WPARAM)cunya, (LPARAM)value);
-				// wprintf(L"Selected item index=[%i], value=[%s].\n", cunya, value);
+				// debug(L"Selected item index=[%i], value=[%s].\n", cunya, value);
 				// break;
 			case 7:
-				wprintf(L"Configurations changed.\n");
+				debug(L"Configurations changed.\n");
 				break;
 			default:
-				wprintf(L"Some command launched, hwnd=[%i] && id=[%i]!\n", lParam, LOWORD(wParam));
+				debug(L"Some command launched, hwnd=[%i] && id=[%i]!\n", lParam, LOWORD(wParam));
 				break;
 			}
 			break;
 		case WM_DESTROY:
-			wprintf(L"Shutdown passed...");
+			debug(L"Shutdown passed...");
 			HWND X86 = FindWindow(L"_HIDDEN_X86_HELPER", NULL);
 			PostMessage(X86, WM_QUIT, 0, 0);
 			Shell_NotifyIcon(NIM_DELETE, &NMTrayIcon);

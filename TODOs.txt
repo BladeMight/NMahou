@@ -3,7 +3,7 @@ Priority: TODO                  : STATUS
 5: Hooks                        : DONE
 4: Conversions                  : DONE
 3: Debug Mode                   : DONE(INITIAL)
-3: No Debug                     : WORKING
+3: No Debug                     : DONE (now debug mode with "make debug" or "make DEBUG=1")
 4: Settings                     : FUTURE
 3: Saving                       : WORKING
 1: GUI                          : INCOMPLETE

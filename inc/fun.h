@@ -23,14 +23,56 @@ BOOL extended(int code) {
 			return FALSE;
 	}
 }
-void KeyRelease(int key) {
-	BOOL ext = extended(key);
-	keybd_event(key, MapVirtualKey(key, 0), ext ? KEYEVENTF_EXTENDEDKEY : 0 | 2, 0);
+void WriteString(wchar_t* str) {
+	int strlen = wcslen(str);
+	INPUT* result = (INPUT*)malloc(strlen * sizeof(INPUT));
+	for (int i = 0; i != strlen; i++) {
+		INPUT ip;
+		ip.type = INPUT_KEYBOARD;
+		ip.ki.wVk = 0;
+		ip.ki.dwFlags = KEYEVENTF_UNICODE;
+		ip.ki.wScan = str[i]; 
+		ip.ki.dwExtraInfo = 0;
+		ip.ki.time = 0;
+		if ((str[i] == L'\n' && str[i-1] != L'\r') || 
+			(str[i] == L'\r' && str[i+1] != L'\n')) {
+			ip.ki.wScan = 0;
+			ip.ki.wVk = VK_RETURN;
+		}
+		if (str[i] == L'\r' && str[i+1] == L'\n') {
+			ip.ki.wScan = 0;
+			ip.ki.wVk = VK_RETURN;
+			continue;
+		}
+        result[i] = ip;
+        // debug(L"Added %d\n", str[i]);
+	}
+	SendInput(strlen, result, sizeof(INPUT));
+	// free(result);
 }
-void KeyPress(int key) {
-	BOOL ext = extended(key);
-	keybd_event(key, MapVirtualKey(key, 0), ext ? KEYEVENTF_EXTENDEDKEY : 0 | 0, 0);
-	keybd_event(key, MapVirtualKey(key, 0), ext ? KEYEVENTF_EXTENDEDKEY : 0 | 2, 0);
+void HoldKey(int vk) {
+	INPUT ip;
+	ip.type = INPUT_KEYBOARD;
+	ip.ki.wVk = vk;
+	ip.ki.dwFlags = extended(vk) ? KEYEVENTF_EXTENDEDKEY : 0;
+	ip.ki.wScan = MapVirtualKey(vk, 0); 
+	ip.ki.dwExtraInfo = 0;
+	ip.ki.time = 0;
+	SendInput(1, &ip, sizeof(INPUT));
+}
+void ReleaseKey(int vk) {
+	INPUT ip;
+	ip.type = INPUT_KEYBOARD;
+	ip.ki.wVk = vk;
+	ip.ki.dwFlags = (extended(vk) ? KEYEVENTF_EXTENDEDKEY : 0) | KEYEVENTF_KEYUP;
+	ip.ki.wScan = MapVirtualKey(vk, 0); 
+	ip.ki.dwExtraInfo = 0;
+	ip.ki.time = 0;
+	SendInput(1, &ip, sizeof(INPUT));
+}
+void PressKey(int vk) {
+	HoldKey(vk);
+	ReleaseKey(vk);
 }
 void SetModifs(int code, BOOL value) {
 	switch(code) {
@@ -54,27 +96,27 @@ void SetModifs(int code, BOOL value) {
 }
 void SendModifiersUp() {
 	if (Lshift)
-		KeyRelease(VK_LSHIFT);
+		ReleaseKey(VK_LSHIFT);
 	if (Lalt)
-		KeyRelease(VK_LMENU);
+		ReleaseKey(VK_LMENU);
 	if (Lctrl)
-		KeyRelease(VK_LCONTROL);
+		ReleaseKey(VK_LCONTROL);
 	if (Lwin)
-		KeyRelease(VK_LWIN);
+		ReleaseKey(VK_LWIN);
 	if (Rshift)
-		KeyRelease(VK_RSHIFT);
+		ReleaseKey(VK_RSHIFT);
 	if (Ralt)
-		KeyRelease(VK_RMENU);
+		ReleaseKey(VK_RMENU);
 	if (Rctrl)
-		KeyRelease(VK_RCONTROL);
+		ReleaseKey(VK_RCONTROL);
 	if (Rwin)
-		KeyRelease(VK_RWIN);
+		ReleaseKey(VK_RWIN);
 }
 void SendClipCopy() {
-	keybd_event(VK_RCONTROL, MapVirtualKey(VK_RCONTROL, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-	keybd_event(VK_INSERT, MapVirtualKey(VK_INSERT, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
-	keybd_event(VK_INSERT, MapVirtualKey(VK_INSERT, 0), KEYEVENTF_EXTENDEDKEY | 2, 0);
-	keybd_event(VK_RCONTROL, MapVirtualKey(VK_RCONTROL, 0), KEYEVENTF_EXTENDEDKEY | 2, 0);
+	HoldKey(VK_RCONTROL);
+	PressKey(VK_INSERT);
+	ReleaseKey(VK_RCONTROL);
+	Sleep(30);
 }
 void ChangeLayout() {
 	// if (cyclemode)
@@ -87,55 +129,27 @@ void ConvertTyped(list_t* word) {
 	SendModifiersUp();
 	ChangeLayout();
 	for (int i = 0; i < word->lenght; i++)
-		KeyPress(VK_BACK);
+		PressKey(VK_BACK);
 	for (int i = 0; i <= word->lenght; i++) {
 		int key = index_val(word, i);
-		KeyPress(key);
+		PressKey(key);
 	}
 	SELF = FALSE;
 }
-LPWSTR InAnotherLayout(wchar_t c, unsigned int layout1, unsigned int layout2) {
+wchar_t* InAnotherLayout(wchar_t c, unsigned int layout1, unsigned int layout2) {
 	unsigned int scan = VkKeyScanExW(c, (HKL)(uintptr_t)(layout1 & 0xffff));
 	if (scan == -1) return L"";
-	// wprintf(L"B %c, S %i, L %i, l %i\n", c, scan, (layout1 & 0xffff), (layout2 & 0xffff));
+	// debug(L"B %c, S %i, L %i, l %i\n", c, scan, (layout1 & 0xffff), (layout2 & 0xffff));
 	int CST = (scan >> 8) & 0xff;
-	BYTE* state = malloc(256);
+	BYTE* state = (BYTE*)malloc(256);
 	if (CST == 1)
 		state[VK_SHIFT] = 0xFF;
-	LPWSTR character = malloc(sizeof(LPWSTR));
+	wchar_t* character = (wchar_t*)malloc(sizeof(wchar_t) * 2); wcscpy(character, L"");
 	ToUnicodeEx(scan, scan, state, character, 3, 0, (HKL)(uintptr_t)(layout2 & 0xffff));
-	// wprintf(L"character is [%s]\n", character);
-	free(state);
+	// debug(L"character is [%s]\n", character);
+	// free(state);
 	// free(character);
 	return character;
-}
-void InputString(wchar_t* str) {
-	for (int i = 0; i <= wcslen(str); i++) {
-		wchar_t s = str[i];
-		INPUT down;
-		down.type = INPUT_KEYBOARD;
-		down.ki.wVk = 0;
-		down.ki.wScan = s;
-		down.ki.time = 0;
-		down.ki.dwExtraInfo = 0;
-		down.ki.dwFlags = KEYEVENTF_UNICODE;
-		INPUT up;
-		up.type = INPUT_KEYBOARD;
-		up.ki.wVk = 0;
-		up.ki.wScan = s;
-		up.ki.time = 0;
-		up.ki.dwExtraInfo = 0;
-		up.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
-		if ((s == L'\n' && str[i-1] != L'\r') || 
-			(s == L'\r' && str[i+1] != L'\n')) {
-			down.ki.wScan = 0;
-			down.ki.wVk = VK_RETURN;
-			up.ki.wScan = 0;
-			up.ki.wVk = VK_RETURN;
-		}
-		SendInput(1, &down, sizeof(INPUT));
-		SendInput(1, &up, sizeof(INPUT));
-	}
 }
 wchar_t* wcsztok(wchar_t* str, const wchar_t* delim) {
     static wchar_t* static_str = 0;
@@ -170,33 +184,40 @@ wchar_t* wcsztok(wchar_t* str, const wchar_t* delim) {
 void ConvertSelection() {
 	SELF = TRUE;
 	LPWSTR backup = GetClipboardText();
+	wchar_t* b = (wchar_t*)malloc((wcslen(backup)+1) * sizeof(wchar_t));
+	wcscpy(b, L"");
+	wcscpy(b, backup);
+	debug(L"Clipboard backup: [%s]\n", backup);
 	ClearClipboard();
 	SendClipCopy();
 	LPWSTR selection = GetClipboardText();
 	if (selection != NULL && selection != L"") {
 		int selen = wcslen(selection);
-		wchar_t* result = malloc(sizeof(wchar_t) * (selen+1)); wcscpy(result, L"");
+		wchar_t* result = (wchar_t*)malloc(sizeof(wchar_t) * (selen+1)); 
+		wcscpy(result, L"");
 		wchar_t* line;
 		wchar_t* word;
 		line = wcstok(selection, L"\n");
-		wprintf(L"Selection is [%s](%i).", selection, selen);
+		debug(L"Selection is [%s](%i).", selection, selen);
 		while (line != NULL) {
-			wprintf (L"Line: [%s],\n  Words: ", line, selen);
+			debug (L"Line: [%s],\n  Words: ", line, selen);
 			word = wcsztok(line, L" ");
 			while (word != NULL) {
 				int wolen = wcslen(word);
-				wprintf(L"(%s)", word);
+				debug(L"(%s)", word);
 				int woL1min = 0;
 				int woL2min = 0;
-				wchar_t* wordL1 = malloc(sizeof(wchar_t) * (wolen+1)); wcscpy(wordL1, L"");
-				wchar_t* wordL2 = malloc(sizeof(wchar_t) * (wolen+1)); wcscpy(wordL2, L"");
+				wchar_t* wordL1 = (wchar_t*)malloc((wolen+1) * sizeof(wchar_t));
+				wcscpy(wordL1, L"");
+				wchar_t* wordL2 = (wchar_t*)malloc((wolen+1) * sizeof(wchar_t));
+				wcscpy(wordL2, L"");
 				for (int i = 0; i < wolen; i++) {
-					wprintf(L"WOLEN: %i, I: %i, RLEN: %i\n", wolen, i, wcslen(result));
+					debug(L"WOLEN: %i, I: %i, RLEN: %i\n", wolen, i, wcslen(result));
 					LPWSTR CL1 = InAnotherLayout(word[i], LAYOUT2, LAYOUT1);
 					LPWSTR CL2 = InAnotherLayout(word[i], LAYOUT1, LAYOUT2);
 					if ((wcscmp(CL1, L"") == 0) && (wcscmp(CL2, L"") == 0) ||
 						wcscmp(CL1, CL2) == 0) {
-						wprintf(L"Rewriting [%c].\n", word[i]);
+						debug(L"Rewriting [%c].\n", word[i]);
 						wordL1[i] = word[i];
 						wordL2[i] = word[i];
 					} else {
@@ -209,10 +230,10 @@ void ConvertSelection() {
 						else
 							woL2min++;
 					}
-					wprintf(L"C1 [%s], C2 [%s]\n", CL1, CL2);
+					debug(L"C1 [%s], C2 [%s]\n", CL1, CL2);
 				}
-				wprintf(L"W1 [%s], W2 [%s]\n", wordL1, wordL2);
-				wprintf(L"cc1 [%i], cc2 [%i]\n", woL1min, woL2min);
+				debug(L"W1 [%s], W2 [%s]\n", wordL1, wordL2);
+				debug(L"cc1 [%i], cc2 [%i]\n", woL1min, woL2min);
 				if (woL1min < woL2min)
 					wcscat(result, wordL1);
 				else
@@ -220,21 +241,24 @@ void ConvertSelection() {
 				word = wcsztok(NULL, L" ");
 				if (word != NULL && word != L" ")
 					wcscat(result, L" ");
-				free(wordL1);
-				free(wordL2);
+				// free(wordL1);
+				// free(wordL2);
 			}
-			wprintf(L"\n");
+			debug(L"\n");
 			line = wcstok(NULL, L"\n");
 			if (line != NULL) // If not LAST line
 				wcscat(result, L"\n");
 		}
-		wprintf(L"Whole selection [%s].\n", selection);
-		wprintf(L"INPUTTING: result [%s]\n", result);
-		InputString(result);
-		free(result);
+		debug(L"Whole selection [%s].\n", selection);
+		debug(L"INPUTTING: result [%s]\n", result);
+		WriteString(result);
+		// free(result);
 	}
-	if (backup != NULL)
-		SetClipboardText(backup);
+	if (backup != NULL) {
+		SetClipboardText(b);
+		Sleep(30);
+		// free(b);
+	}
 	SELF = FALSE;
 }
 int CheckHotkey(int code) {
@@ -251,6 +275,7 @@ int CheckHotkey(int code) {
 		return 3;
 	}
 	if (code == VK_F6) {
+		WriteString(L"Sword");
 		print_list(c_line);
 		print_list(c_word);
 		print_list(a_layouts);
@@ -261,7 +286,7 @@ int CheckHotkey(int code) {
 		return 7;
 	}
 	if (code == VK_F11) {
-		wprintf(L"%s\n", GetClipboardText());
+		debug(L"%s\n", GetClipboardText());
 		return 5;
 	}
 	if (code == VK_F2) {

@@ -8,6 +8,7 @@ INC=-I.\inc -I.\res -I.\jkl
 CC=gcc
 RC=windres
 XARCH=
+DEBUG=0
 FLG=-lgdi32 -lcomctl32 -s -Os -DUNICODE -D_UNICODE
 dllflg=-DUNICODE -D_UNICODE -s -Os -shared -o 
 exeflg=-DUNICODE -D_UNICODE -s -Os -o 
@@ -23,6 +24,9 @@ else
 	EXE=$(NAME)64.exe
 	BINS := $(BINS) $(BINDIR)jklx86.exe $(BINDIR)jklx86.dll
 endif
+ifeq ($(DEBUG), 1)
+	DFLG = -DDEBUG
+endif
 # DBG=Debug mode, don't use [-s] and [-Os] switches. [Y]
 ifeq ($(DBG), Y)
 	FLG:=$(filter-out -s -Os,$(FLG))
@@ -34,7 +38,7 @@ endif
 
 all: $(OBJDIR) $(BINDIR) $(OBJ) $(BINS)
 	@echo Compiling NMahou.exe objects into executable...
-	@$(CC) $(ARCH) $(INC) $(MAHOU_OBJ) $(FLG) $(XARCH) -o $(BINDIR)$(EXE) $(UPXEXEC)
+	@$(CC) $(ARCH) $(INC) $(MAHOU_OBJ) $(FLG) $(XARCH) $(DFLG) -o $(BINDIR)$(EXE) $(UPXEXEC)
 	@echo Done.
 
 $(OBJDIR)/jkl.dll.o:
@@ -76,7 +80,7 @@ $(BINDIR):
 
 $(OBJDIR)/%.o: %.c
 	@echo Compiling $@...
-	@$(CC) $(ARCH) $(XARCH) $(INC) -c $< -o $@
+	@$(CC) $(ARCH) $(XARCH) $(DFLG) $(INC) -c $< -o $@
 	@echo Done.
 
 $(OBJDIR)/resource.o:
@@ -100,4 +104,11 @@ zip: all
 	@echo Done.
 
 re: clean all
+debug:
+	@$(MAKE) all DEBUG=1
+renm: 
+	@echo Removing NMahou build files...
+	-@rm -f obj/NMahou.o obj64/NMahou.o bin/NMahou.exe  obj64/resource.o  obj/resource.o
+	@echo Done.
+	@$(MAKE) all
 reboth: clean both

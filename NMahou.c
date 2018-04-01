@@ -10,7 +10,7 @@ void RefreshLayouts() {
 	HKL* layouts = (HKL*)LocalAlloc(LPTR, (LayoutsCount * sizeof(HKL)));
 	GetKeyboardLayoutList(LayoutsCount, layouts);
 	for (int i = 0; i < LayoutsCount; i++) {
-		// wprintf(L"%i\n", layouts[i]);
+		// debug(L"%i\n", layouts[i]);
 		HKL l = layouts[i];
 		add(a_layouts, (uintptr_t)l, L"");
 		LAYOUT2 = (uintptr_t)l;

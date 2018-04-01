@@ -1,38 +1,45 @@
 #include <windows.h>
 
+BOOL OpenClip() {
+  if (!OpenClipboard(NULL)) {
+	debug(L"Clipboard can't be opened, error: %i.\n", GetLastError());
+	return FALSE;
+  }
+  return TRUE;
+}
+
 void ClearClipboard() {	
-	OpenClipboard(NULL);
+	if (!OpenClip()) return;
 	EmptyClipboard();
 	CloseClipboard();
 }
-LPWSTR GetClipboardText() {
-	OpenClipboard(0);
-	LPWSTR _GetText = GetClipboardData(CF_UNICODETEXT);
-	for (int i = 0; i != 3; i++) {
-		wprintf(L"Tries %i, result: %s.\n", i, _GetText);
-		if (_GetText == NULL)
-			_GetText = GetClipboardData(CF_UNICODETEXT);
-		else break;
-	}
-	CloseClipboard();
-	return _GetText;
+wchar_t* GetClipboardText() {
+  if (!OpenClip()) return L"";
+  HANDLE hData = GetClipboardData(CF_UNICODETEXT);
+  if (hData == NULL) {
+	debug(L"Clipboard has no data.\n");
+	return L"";
+  }
+  wchar_t* pszText = (wchar_t*)GlobalLock(hData);
+  if (pszText == NULL) {
+	debug(L"Clipboard data handle lock has no data.\n");
+	return L"";
+  }
+  GlobalUnlock(hData);
+  CloseClipboard();
+  return pszText;
 }
 
-void SetClipboardText(LPWSTR _Text) {
-	LPWSTR _TextBuffer;
-	HGLOBAL _SetBuffer;
-	wprintf(L"Settings [%s] text to clipboard...", _Text);
-	_SetBuffer = GlobalAlloc(GHND, (wcslen(_Text) + 1) * sizeof(wchar_t)); 
-	if(_SetBuffer != NULL) {
-		_TextBuffer = (LPWSTR)GlobalLock(_SetBuffer);
-		if(_TextBuffer != NULL) {
-			wcscpy(_TextBuffer, _Text);
-			GlobalUnlock(_SetBuffer);
-			OpenClipboard(NULL);
-			EmptyClipboard();
-			SetClipboardData(CF_UNICODETEXT, _SetBuffer);
-			GlobalUnlock(_TextBuffer);
-			CloseClipboard();
-		}
+void SetClipboardText(wchar_t* _text) {
+	if(OpenClip()) {
+		HGLOBAL clipbuffer;
+		wchar_t* buffer;
+		EmptyClipboard();
+		clipbuffer = GlobalAlloc(GMEM_DDESHARE, sizeof(wchar_t) * (wcslen(_text)+1));
+		buffer = (wchar_t*)GlobalLock(clipbuffer);
+		wcscpy(buffer, _text);
+		GlobalUnlock(clipbuffer);
+		SetClipboardData(CF_UNICODETEXT, clipbuffer);
+		CloseClipboard();
 	}
 }

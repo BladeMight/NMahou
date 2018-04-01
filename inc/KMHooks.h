@@ -48,14 +48,14 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		switch(wParam) {
 			case WM_KEYUP:
 			case WM_SYSKEYUP:
-					wprintf(L"Released key with VK_CODE=[%i], KEY_NAME=[%s]", code, keyName);
+					debug(L"Released key with VK_CODE=[%i], KEY_NAME=[%s]", code, keyName);
 					if (printable(code))
-						wprintf(L", KEY_CHARACTER = [%s]", ch);
+						debug(L", KEY_CHARACTER = [%s]", ch);
 					if (modifs != L"")
-						wprintf(L", modifiers=[%s]", modifs);
-					wprintf(L".\n");
+						debug(L", modifiers=[%s]", modifs);
+					debug(L".\n");
 					if (code == VK_RMENU) {
-						wprintf(L"LOL:\n");
+						debug(L"LOL:\n");
 						keybd_event(VK_LMENU, MapVirtualKey(VK_LMENU, 0), KEYEVENTF_EXTENDEDKEY | 0, 0);
 						keybd_event(VK_LSHIFT, MapVirtualKey(VK_LSHIFT, 0), 0, 0);
 						keybd_event(VK_LSHIFT, MapVirtualKey(VK_LSHIFT, 0), KEYEVENTF_KEYUP, 0);
@@ -64,12 +64,12 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					break;
 			case WM_KEYDOWN:
 			case WM_SYSKEYDOWN:
-					wprintf(L"Pressed key with VK_CODE=[%i], KEY_NAME=[%s], ", code, keyName);
+					debug(L"Pressed key with VK_CODE=[%i], KEY_NAME=[%s], ", code, keyName);
 					if (printable(code))
-						wprintf(L", KEY_CHARACTER = [%s]", ch);
+						debug(L", KEY_CHARACTER = [%s]", ch);
 					if (modifs != L"")
-						wprintf(L", modifiers=[%s]", modifs);
-					wprintf(L".\n");
+						debug(L", modifiers=[%s]", modifs);
+					debug(L".\n");
 					if (code == VK_BACK)
 						rem(c_word);
 					else if (printable(code)) {
@@ -87,10 +87,10 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					   clear(&c_word);
 					   clear(&c_line);
 					}
-					wprintf(L"Hotkey <%i> fired(-1 = not).\n", CheckHotkey(code));
+					debug(L"Hotkey <%i> fired(-1 = not).\n", CheckHotkey(code));
 					break;
 		}
-		wprintf(L"Freeing allocated variables(keyName, modifs, ch, kst).\n");
+		debug(L"Freeing allocated variables(keyName, modifs, ch, kst).\n");
 		free(keyName);
 		free(modifs);
 		if (ch != L"")
@@ -104,7 +104,7 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		if (wParam == WM_RBUTTONDOWN || wParam == WM_LBUTTONDOWN) {
 			clear(&c_word);
 			clear(&c_line);
-			wprintf(L"Cleared by mouse click.\n");
+			debug(L"Cleared by mouse click.\n");
 		}
 	}
 	return CallNextHookEx( NULL, nCode, wParam, lParam);
@@ -112,8 +112,8 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
 LRESULT CALLBACK ServerProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 	if (Msg == uMSG) // MEOW!
-		wprintf(L"LAYOUT CHANGED!!! W: %i, L: %i\n", wParam, lParam);
+		debug(L"LAYOUT CHANGED!!! W: %i, L: %i\n", wParam, lParam);
 	else 
-		wprintf(L"MSG: %i, %i\n", Msg, uMSG);
+		debug(L"MSG: %i, %i\n", Msg, uMSG);
 	return DefWindowProc(hWnd, Msg, wParam, lParam);
 }

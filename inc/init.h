@@ -22,7 +22,7 @@ void InitTrayIcon() {
 	// char* ascii = malloc(sizeof(WCHAR) * wcslen(Title)); strcpy(ascii, "");
 	// wcstombs(ascii, Title, wcslen(Title) );
 	// strcpy(NMTrayIcon.szTip, ascii);
-	wprintf(L"Creating tray menu...\n");
+	debug(L"Creating tray menu...\n");
 	HMENU hn = LoadMenu(NULL, MAKEINTRESOURCE(IDM_TRAYMENU));
 	NMTrayMenu = GetSubMenu(hn, 0);
 	// Placing tray icon in *tray*
@@ -34,15 +34,15 @@ void InitJKL() {
 		lib = LoadLibrary(L"jkl.dll");
 		FUNC setHook = (FUNC)GetProcAddress(lib, "setHook");
 		if (!setHook())
-			wprintf(L"HOOK SET FAILED!");
+			debug(L"HOOK SET FAILED!");
 		UFUNC getUMsg = (UFUNC)GetProcAddress(lib, "getUMsg");
 		uMSG = getUMsg();
 		#ifndef SUPPORTX86
 			if (FileExist(L"jklx86.exe"))
 				ShellExecute(0, L"open", L"jklx86.exe", NULL, L".\\", SW_HIDE);
 			else
-				wprintf(L"x86 support won't be available...\n");
+				debug(L"x86 support won't be available...\n");
 		#endif
 	} else 
-		wprintf(L"jkl.dll not found...\n");
+		debug(L"jkl.dll not found...\n");
 }
