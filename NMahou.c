@@ -28,6 +28,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR nCmdLine,
 	//Allows displaying of Unicode characters in console.
 	NMInstance = hInstance;
 	_setmode(_fileno(stdout), _O_U16TEXT);
+	_setmode(_fileno(stderr), _O_U16TEXT);
 	c_word = InitList(-1, L"");
 	c_line = InitList(-1, L"");
 	a_layouts = InitList(-1, L"");
