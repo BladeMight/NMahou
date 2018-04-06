@@ -59,11 +59,11 @@ $(BINDIR)jklx86.dll:
 
 $(OBJDIR)/jklx86.exe.o:
 	@echo Compiling jklx86.exe.o...
-	@$(CC) jkl/jklx86.c -c -m32 $(exeflg) $(OBJDIR)/jklx86.exe.o	
+	@$(CC) jkl/jklx86.c -Wl,-Bstatic -lpthread -c -m32 $(exeflg) $(OBJDIR)/jklx86.exe.o	
 
 $(BINDIR)jklx86.exe:
 	@echo Compiling jklx86.exe...
-	@$(CC) $(OBJDIR)/jklx86.exe.o -m32 $(exeflg) $(BINDIR)jklx86.exe
+	@$(CC) $(OBJDIR)/jklx86.exe.o -Wl,-Bstatic -lpthread -m32 $(exeflg) $(BINDIR)jklx86.exe
 
 both: 
 	@echo -e "\e[34mCompiling x32 executable...\e[0m"
