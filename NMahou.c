@@ -12,7 +12,7 @@ void RefreshLayouts() {
 	for (int i = 0; i < LayoutsCount; i++) {
 		// debug(L"%i\n", layouts[i]);
 		HKL l = layouts[i];
-		add(a_layouts, (uintptr_t)l, L"");
+		add(a_layouts, (uintptr_t)l, 0, L"");
 		LAYOUT2 = (uintptr_t)l;
 	}
 	a_layouts->lenght = LayoutsCount - 1;
@@ -29,9 +29,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR nCmdLine,
 	NMInstance = hInstance;
 	_setmode(_fileno(stdout), _O_U16TEXT);
 	_setmode(_fileno(stderr), _O_U16TEXT);
-	c_word = InitList(-1, L"");
-	c_line = InitList(-1, L"");
-	a_layouts = InitList(-1, L"");
+	c_word = InitList(-1, 0, L"");
+	c_line = InitList(-1, 0, L"");
+	a_layouts = InitList(-1, 0, L"");
 	RefreshLayouts();
 	MSG Msg;
 	HHOOK NMMKHook = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, NMInstance,0);

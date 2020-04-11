@@ -8,7 +8,8 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 	KBDLLHOOKSTRUCT *kbdact = (KBDLLHOOKSTRUCT *)lParam;
 	// Initialize variables
 	unsigned int code = kbdact->vkCode;
-	LONG scan = kbdact->scanCode << 16;
+	LONG sc = kbdact->scanCode;
+	LONG scan = sc << 16;
 	if (GetForegroundWindow() != NMMainHWND && !SELF) {
 		wchar_t* keyName = malloc(sizeof(wchar_t)*256); wcscpy(keyName, L"");
 		GetKeyNameTextW(scan, keyName, 256);
@@ -48,7 +49,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 		switch(wParam) {
 			case WM_KEYUP:
 			case WM_SYSKEYUP:
-					debug(L"Released key with VK_CODE=[%i], KEY_NAME=[%s]", code, keyName);
+					debug(L"Released key with VK_CODE=[%i], SC=[%i], KEY_NAME=[%s]", code, sc, keyName);
 					if (printable(code))
 						debug(L", KEY_CHARACTER = [%s]", ch);
 					if (modifs != L"")
@@ -64,7 +65,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					break;
 			case WM_KEYDOWN:
 			case WM_SYSKEYDOWN:
-					debug(L"Pressed key with VK_CODE=[%i], KEY_NAME=[%s], ", code, keyName);
+					debug(L"Pressed key with VK_CODE=[%i], SC=[%i], KEY_NAME=[%s], ", code, sc, keyName);
 					if (printable(code))
 						debug(L", KEY_CHARACTER = [%s]", ch);
 					if (modifs != L"")
@@ -73,10 +74,10 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 					if (code == VK_BACK)
 						rem(c_word);
 					else if (printable(code)) {
-						add(c_word, code, ch);
-						add(c_line, code, ch);
+						add(c_word, code, sc, ch);
+						add(c_line, code, sc, ch);
 					} else if (code == VK_SPACE) {
-						add(c_line, code, ch);
+						add(c_line, code, sc, ch);
 						clear(&c_word);
 					}
 					if (code == VK_RETURN || code == VK_HOME || code == VK_END ||
