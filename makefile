@@ -35,17 +35,16 @@ endif
 ifeq ($(PACK), Y)
 	UPXEXEC=&& upx -9 $(EXE)
 endif
-
 all: $(OBJDIR) $(BINDIR) $(OBJ) $(BINS)
 	@echo Compiling NMahou.exe objects into executable...
 	@$(CC) $(ARCH) $(INC) $(MAHOU_OBJ) $(FLG) $(XARCH) $(DFLG) -o $(BINDIR)$(EXE) $(UPXEXEC)
 	@echo Done.
-
+ 
 $(OBJDIR)/jkl.dll.o:
 	@echo Compiling jkl.dll.o...
 	@$(CC) $(ARCH) jkl/jkl.cxx -c $(dllflg) $(OBJDIR)/jkl.dll.o
 	
-$(BINDIR)jkl.dll:
+$(BINDIR)jkl.dll: $(OBJDIR)/jkl.dll.o
 	@echo Compiling jkl.dll...
 	@$(CC) $(ARCH) $(OBJDIR)/jkl.dll.o $(dllflg) $(BINDIR)jkl.dll
 	
@@ -53,7 +52,7 @@ $(OBJDIR)/jklx86.dll.o:
 	@echo Compiling jklx86.dll.o...
 	@$(CC) -m32 jkl/jkl.cxx -c $(dllflg) $(OBJDIR)/jklx86.dll.o
 
-$(BINDIR)jklx86.dll:
+$(BINDIR)jklx86.dll: $(OBJDIR)/jklx86.dll.o
 	@echo Compiling jklx86.dll...
 	@$(CC) -m32 $(OBJDIR)/jklx86.dll.o $(dllflg) $(BINDIR)jklx86.dll
 
@@ -61,7 +60,7 @@ $(OBJDIR)/jklx86.exe.o:
 	@echo Compiling jklx86.exe.o...
 	@$(CC) jkl/jklx86.c -Wl,-Bstatic -lpthread -c -m32 $(exeflg) $(OBJDIR)/jklx86.exe.o	
 
-$(BINDIR)jklx86.exe:
+$(BINDIR)jklx86.exe: $(OBJDIR)/jklx86.exe.o
 	@echo Compiling jklx86.exe...
 	@$(CC) $(OBJDIR)/jklx86.exe.o -Wl,-Bstatic -lpthread -m32 $(exeflg) $(BINDIR)jklx86.exe
 
@@ -93,17 +92,21 @@ clean:
 	-@rm -f -r obj obj64 bin
 	@echo Done.
 
-run: all
+run:
 	@echo Starting executable...
+	@$(MAKE) -s all
 	@$(BINDIR)$(EXE)
 	@$(MAKE) clean
 
-zip: all
+zip:
+	@$(MAKE) -s all
 	@echo Compressing executables...
 	-@upx -9 $(BINDIR)$(NAME).exe $(BINDIR)$(NAME)64.exe $(BINDIR)jkl.dll $(BINDIR)jklx86.exe $(BINDIR)jklx86.dll
 	@echo Done.
 
-re: clean all
+re:
+	@$(MAKE) -s clean
+	@$(MAKE) -s all
 debug:
 	@$(MAKE) all DEBUG=1
 renm: 
@@ -111,4 +114,6 @@ renm:
 	-@rm -f obj/NMahou.o obj64/NMahou.o bin/NMahou.exe  obj64/resource.o  obj/resource.o
 	@echo Done.
 	@$(MAKE) all
-reboth: clean both
+reboth: 
+	@$(MAKE) -s clean
+	@$(MAKE) -s both
